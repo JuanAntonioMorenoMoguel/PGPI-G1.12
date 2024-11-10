@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/registro.css' %}">
+</head>
+<body>
+    <div class="form-container">
+        <h2>Registro</h2>
+    
+        <!-- Mostrar errores generales sobre el formulario -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger" style="margin-bottom: 20px; border-radius: 4px; background-color: #f8d7da; color: #721c24; padding: 10px;">
+                {{ form.non_field_errors|join:"<br>"|safe }}
+            </div>
+        {% endif %}
+    
+        <!-- Mostrar mensajes de Django -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-info" style="margin-bottom: 20px; border-radius: 4px; background-color: #e9ecef; color: #495057; padding: 10px;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    
+        <form method="POST" autocomplete="off">
+            {% csrf_token %}
+    
+            <div class="form-group">
+                <label for="first_name">Nombre</label>
+                {{ form.first_name.errors|join:"<br>"|safe }}
+                {{ form.first_name }}
+            </div>
+    
+            <div class="form-group">
+                <label for="last_name">Apellidos</label>
+                {{ form.last_name.errors|join:"<br>"|safe }}
+                {{ form.last_name }}
+            </div>
+    
+            <div class="form-group">
+                <label for="email">Correo Electrónico</label>
+                {{ form.email.errors|join:"<br>"|safe }}
+                {{ form.email }}
+            </div>
+    
+            <div class="form-group">
+                <label for="password1">Contraseña</label>
+                {{ form.password1.errors|join:"<br>"|safe }}
+                {{ form.password1 }}
+            </div>
+    
+            <div class="form-group">
+                <label for="password2">Confirmar Contraseña</label>
+                {{ form.password2.errors|join:"<br>"|safe }}
+                {{ form.password2 }}
+            </div>
+    
+            <button type="submit" class="btn btn-primary w-100">Registrar</button>
+        </form>
+    </div>
+</body>
+</html>
