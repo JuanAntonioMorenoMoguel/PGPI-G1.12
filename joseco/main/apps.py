@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class ReservaCursosConfig(AppConfig):
+class MainConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'reserva_cursos'
+    name = 'main'

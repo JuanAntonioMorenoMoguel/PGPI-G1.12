@@ -1,0 +1,85 @@
+/* Centrar todo el cuerpo */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    display: flex; /* Flexbox para centrar */
+    justify-content: center; /* Centrado horizontal */
+    align-items: center; /* Centrado vertical */
+    min-height: 100vh; /* Altura mínima de la ventana */
+    margin: 0; /* Eliminar márgenes del body */
+}
+
+.form-container {
+    max-width: 500px;
+    width: 100%; /* Adapta a pantallas pequeñas */
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center; /* Centra los textos y elementos dentro del formulario */
+}
+
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left; /* Etiquetas alineadas a la izquierda */
+}
+
+.form-group label {
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%; /* Esto asegura que el input ocupe todo el ancho del contenedor */
+    max-width: 500px; /* Limita el ancho máximo para evitar inputs demasiado largos */
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box; /* Incluye el padding y el borde en el ancho total */
+}
+
+.form-group input:focus {
+    border-color: #80bdff;
+    outline: none;
+}
+
+button.btn {
+    display: block;
+    width: 100%; /* Asegura que el botón también ocupe todo el ancho */
+    max-width: 500px; /* Igual que los inputs */
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #ffffff;
+    cursor: pointer;
+    text-align: center;
+}
+
+button.btn:hover {
+    background-color: #28a745; /* Color verde */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Profundidad */
+}
+
+.alert {
+    margin-bottom: 20px;
+    border-radius: 4px;
+    padding: 10px;
+    width: 100%;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.alert-info {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+
