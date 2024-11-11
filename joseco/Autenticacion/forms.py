@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+
 
 class CustomRegisterForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=True, label='Nombre')
@@ -17,39 +19,32 @@ class CustomRegisterForm(UserCreationForm):
             raise forms.ValidationError('Este correo electrónico ya está registrado.')
         return email
 
-    def clean(self):
-        cleaned_data = super().clean()
-        password1 = cleaned_data.get('password1')
-        password2 = cleaned_data.get('password2')
-
-        if password1 and password2 and password1 != password2:
-            raise forms.ValidationError('Las contraseñas no coinciden. Inténtalo de nuevo.')
-        
-        return cleaned_data
-    
     def save(self, commit=True):
         user = super().save(commit=False)
-        email = self.cleaned_data['email']
-        user.username = email.split('@')[0]  # Parte izquierda del email como username
-        user.first_name = self.cleaned_data['first_name']
-        user.last_name = self.cleaned_data['last_name']
-        user.email = email
+        user.username = self.cleaned_data['email']  # Asignar email como username
         if commit:
             user.save()
         return user
 
+
 class CustomLoginForm(forms.Form):
     email = forms.EmailField(required=True, label='Correo Electrónico')
-    
+    password = forms.CharField(widget=forms.PasswordInput, label='Contraseña')
+
     def clean(self):
         cleaned_data = super().clean()
-        password = cleaned_data.get('password')
         email = cleaned_data.get('email')
+        password = cleaned_data.get('password')
 
-        if User.objects.filter(email=email).exists() == False:
-            raise forms.ValidationError('Este correo electrónico no está resgistrado.')
-        if User.objects.filter(email=email).exists() == True:
-            if User.objects.get(email=email).check_password(password) == False:
-                raise forms.ValidationError('La contraseña no es correcta.')
-        
+        user = User.objects.get(email=email)
+        # Verificar si el correo está registrado
+        if user.exists() == False:
+            raise forms.ValidationError('Este correo electrónico no está registrado.')
+
+        # Autenticar al usuario con username y password
+        user = authenticate(email=user.email, password=password)
+        if user is None:
+            raise forms.ValidationError('La contraseña no es correcta.')
+
+        # Si todo está bien, retorna los datos limpios
         return cleaned_data
