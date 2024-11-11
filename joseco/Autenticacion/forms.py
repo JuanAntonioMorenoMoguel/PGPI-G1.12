@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 
 
+
 class CustomRegisterForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=True, label='Nombre')
     last_name = forms.CharField(max_length=30, required=True, label='Apellidos')
@@ -36,17 +37,18 @@ class CustomLoginForm(forms.Form):
         email = cleaned_data.get('email')
         password = cleaned_data.get('password')
 
-        user = User.objects.get(email=email)
-        # Verificar si el correo está registrado
-        if user.exists() == False:
+        # Buscar usuario por email
+        user = User.objects.filter(email=email).first()
+        if not user:
             raise forms.ValidationError('Este correo electrónico no está registrado.')
 
-        # Autenticar al usuario con username y password
-        user = authenticate(email=user.email, password=password)
-        if user is None:
-            raise forms.ValidationError('La contraseña no es correcta.')
+        # Autenticar usando el username del usuario encontrado
+        user = authenticate(username=user.username, password=password)
+        if not user:
+            raise forms.ValidationError('Credenciales incorrectas.')
 
-        # Si todo está bien, retorna los datos limpios
+        # Pasamos el usuario autenticado a los datos limpios
+        cleaned_data['user'] = user
         return cleaned_data
     
 

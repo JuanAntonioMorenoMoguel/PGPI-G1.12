@@ -75,6 +75,11 @@ TEMPLATES = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'Autenticacion.backend.EmailBackend',  # Cambia 'tu_app' por el nombre de tu app
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 WSGI_APPLICATION = 'joseco.wsgi.application'
 
 
@@ -135,3 +140,4 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
