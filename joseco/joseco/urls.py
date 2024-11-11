@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls')),  # La URL raíz del proyecto apunta a main
     path('registro/', include('Autenticacion.urls')),
+    path('iniciar_sesion/', include('Autenticacion.urls')),
 ]

@@ -37,3 +37,19 @@ class CustomRegisterForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+class CustomLoginForm(forms.Form):
+    email = forms.EmailField(required=True, label='Correo Electrónico')
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        email = cleaned_data.get('email')
+
+        if User.objects.filter(email=email).exists() == False:
+            raise forms.ValidationError('Este correo electrónico no está resgistrado.')
+        if User.objects.filter(email=email).exists() == True:
+            if User.objects.get(email=email).check_password(password) == False:
+                raise forms.ValidationError('La contraseña no es correcta.')
+        
+        return cleaned_data
