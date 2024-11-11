@@ -14,10 +14,9 @@
       crossorigin="anonymous"
     />
     {% block title %}{% endblock title %} {% block extra_css %}{% endblock extra_css %}
-    <!-- Bloque para CSS extra -->
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
       <div class="container">
         <a class="navbar-brand" href="{% url 'index' %}">JOSECO</a>
         <button
@@ -32,16 +31,27 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
+          <!-- Elementos alineados a la izquierda -->
+          <ul class="navbar-nav me-auto">
             <li class="nav-item">
               <a class="nav-link" href="{% url 'index' %}">Inicio</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'registro' %}">Registro</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'iniciar_sesion' %}">Iniciar Sesión</a>
-            </li>
+          </ul>
+    
+          <!-- Elementos alineados a la derecha -->
+          <ul class="navbar-nav ms-auto">
+            {% if not user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'registro' %}">Registro</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'iniciar_sesion' %}">Iniciar SesiÃ³n</a>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <span class="nav-link text-white">{{ user.email }}</span>
+              </li>
+            {% endif %}
           </ul>
         </div>
       </div>
