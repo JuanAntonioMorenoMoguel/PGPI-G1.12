@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
-from .forms import CustomLoginForm, CustomRegisterForm
+from .forms import CustomLoginForm, CustomRegisterForm, EditarPerfilForm
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+
 
 def registro(request):
     if request.method == 'POST':
@@ -42,3 +44,18 @@ def inicio_sesion(request):
         form = CustomLoginForm()
 
     return render(request, 'inicio_sesion.html', {'form': form})
+
+@login_required
+def editar_perfil(request):
+    if request.method == 'POST':
+        form = EditarPerfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '¡Tu perfil ha sido actualizado correctamente!')
+            return redirect('index')
+        else:
+            messages.error(request, 'Por favor corrige los errores.')
+    else:
+        form = EditarPerfilForm(instance=request.user)
+
+    return render(request, 'editar_perfil.html', {'form': form})

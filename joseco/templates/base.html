@@ -45,11 +45,11 @@
                 <a class="nav-link" href="{% url 'registro' %}">Registro</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'iniciar_sesion' %}">Iniciar SesiÃ³n</a>
+                <a class="nav-link" href="{% url 'iniciar_sesion' %}">Iniciar Sesion</a>
               </li>
             {% else %}
               <li class="nav-item">
-                <span class="nav-link text-white">{{ user.email }}</span>
+                <a class="nav-link text-white" href="{% url 'editar_perfil' %}">{{ user.email }}</a>
               </li>
             {% endif %}
           </ul>
