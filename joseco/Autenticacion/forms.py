@@ -48,3 +48,19 @@ class CustomLoginForm(forms.Form):
 
         # Si todo está bien, retorna los datos limpios
         return cleaned_data
+    
+
+class EditarPerfilForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=30, required=True, label='Nombre')
+    last_name = forms.CharField(max_length=30, required=True, label='Apellidos')
+    email = forms.EmailField(required=True, label='Correo Electrónico')
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError('Este correo electrónico ya está registrado.')
+        return email
