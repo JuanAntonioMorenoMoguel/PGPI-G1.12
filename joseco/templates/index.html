@@ -5,8 +5,29 @@
 {% endblock title %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1>Bienvenido a JOSECO</h1>
-    <p>Esta es la página principal de tu aplicación.</p>
-</div>
+
+    <!-- Sección principal -->
+    <div class="principal">
+        <div class="principal-overlay"></div>
+        <div class="principal-content">
+            <h1>Oposiciones 2025: Abierto plazo de MATRÍCULA</h1>
+            <p>Desde JoseCo nos aseguramos de que cualquiera pueda estudiar para las oposiciones desde la comodidad de
+                su
+                sillón.</p>
+            {% if not user.is_authenticated %}
+            <a class="button-primary" href="{% url 'registro' %}">Registro</a>
+            <a class="button-primary" href="{% url 'inicio_sesion' %}">Iniciar Sesión</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sección de información adicional -->
+    <div class="info-section">
+        <h2>CURSOS ONLINE DESDE CUALQUIER PARTE</h2>
+        <p>
+            En septiembre de 2025 comenzamos nuestro curso de preparación. No te quedes sin tu plaza (limitadas).
+            Grupos reducidos.
+        </p>
+    </div>
+    
 {% endblock content %}
