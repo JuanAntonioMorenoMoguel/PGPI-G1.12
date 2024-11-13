@@ -40,12 +40,20 @@
                 <a class="nav-link" href="{% url 'registro' %}">Registro</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'inicio_sesion' %}">Iniciar Sesion</a>
+                <a class="nav-link" href="{% url 'inicio_sesion' %}">Iniciar Sesión</a>
               </li>
             {% else %}
               <li class="nav-item">
                 <a class="nav-link text-white" href="{% url 'editar_perfil' %}">{{ user.email }}</a>
               </li>
+              <li class="nav-item">
+                <form action="{% url 'cerrar_sesion' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link text-white" style="background: none; border: none; cursor: pointer;">
+                        Cerrar Sesión
+                    </button>
+                </form>
+            </li>
             {% endif %}
           </ul>
         </div>
