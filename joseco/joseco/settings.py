@@ -131,10 +131,15 @@ LOGIN_REDIRECT_URL = 'index'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+# URL para servir archivos estáticos
 STATIC_URL = '/static/'
 
+# Directorio donde Django recopilará todos los archivos estáticos
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Directorios adicionales donde buscas archivos estáticos (si tienes una carpeta 'static')
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',  # Ajusta BASE_DIR si no estÃ¡ configurado como Path
+    BASE_DIR / 'static',
 ]
 
 # Default primary key field type
@@ -142,4 +147,4 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['DaniRuiz23.pythonanywhere.com']
