@@ -66,3 +66,9 @@ class EditarPerfilForm(forms.ModelForm):
         if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError('Este correo electrónico ya está registrado.')
         return email
+
+
+class EliminarPerfilForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = []

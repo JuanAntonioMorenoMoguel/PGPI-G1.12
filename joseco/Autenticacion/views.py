@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .forms import CustomLoginForm, CustomRegisterForm, EditarPerfilForm
+from .forms import CustomLoginForm, CustomRegisterForm, EditarPerfilForm, EliminarPerfilForm
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -87,7 +87,20 @@ def editar_perfil(request):
     return render(request, 'editar_perfil.html', {'form': form})
 
 @login_required
+def eliminar_cuenta(request):
+    if request.method == 'POST':
+        form = EliminarPerfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            request.user.delete()
+            messages.success(request, 'Tu cuenta ha sido eliminada.')
+            return redirect('index')
+        else:
+            messages.error(request, 'Por favor corrige los errores.')
+
+    return render(request, 'eliminar_cuenta.html', {'form': form})
+
+@login_required
 @require_POST 
 def cerrar_sesion(request):
     logout(request)
-    return redirect('index') 
+    return redirect('index')
