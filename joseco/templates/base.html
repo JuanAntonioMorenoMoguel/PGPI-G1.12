@@ -17,7 +17,7 @@
         <a href="{% url 'index' %}" class="navbar-logo no-underline">JoseCo</a>
         {% if user.is_authenticated %}
         <div class="navbar-menu">
-            <a class="nav-link text-white" href="{% url 'editar_perfil' %}">{{ user.email }}</a>
+            <a class="nav-link text-white" href="{% url 'perfil' %}">{{ user.email }}</a>
             <form action="{% url 'cerrar_sesion' %}" method="post" style="display: inline;">
                 {% csrf_token %}
                 <button type="submit" class="nav-link text-white"
