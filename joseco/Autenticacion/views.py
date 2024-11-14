@@ -54,6 +54,7 @@ def registro(request):
 
     return render(request, 'registro.html', {'form': form})
 
+@login_required
 def perfil(request):
     user_profile = request.user
     return render(request, 'perfil.html', {'user_profile': user_profile})

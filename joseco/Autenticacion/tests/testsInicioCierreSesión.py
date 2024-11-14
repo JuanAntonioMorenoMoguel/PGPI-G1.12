@@ -46,3 +46,4 @@ class AuthViewsTest(TestCase):
         
         # Verifica que el usuario ha sido desconectado
         self.assertNotIn('_auth_user_id', self.client.session)
+
