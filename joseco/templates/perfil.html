@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/registro.css' %}">
+  <link rel="stylesheet" href="{% static 'css/estilosbase.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="form-container mt-5">
+    <h2>Perfil de {{ user_profile.first_name }} {{ user_profile.last_name }}</h2>
+
+    <p>Nombre: {{ user_profile.first_name }} {{ user_profile.last_name }}</p>
+    <p>Correo electrónico: {{ user_profile.email }}</p>
+    
+    <button type="button" class="btn btn-primary w-100 mt-3" onclick="window.location.href='{% url 'editar_perfil' %}'">Editar Perfil</button>
+
+    <form method="POST" action="{% url 'eliminar_cuenta' %}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger w-100 mt-3">Eliminar Cuenta</button>
+    </form>
+</div>
+{% endblock content %}

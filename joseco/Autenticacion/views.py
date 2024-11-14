@@ -54,6 +54,9 @@ def registro(request):
 
     return render(request, 'registro.html', {'form': form})
 
+def perfil(request):
+    user_profile = request.user
+    return render(request, 'perfil.html', {'user_profile': user_profile})
 
 def inicio_sesion(request):
     if request.method == 'POST':

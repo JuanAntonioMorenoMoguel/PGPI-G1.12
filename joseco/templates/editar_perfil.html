@@ -49,9 +49,5 @@
 
         <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
     </form>
-    <form method="POST" action="{% url 'eliminar_cuenta' %}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.');">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger w-100 mt-3">Eliminar Cuenta</button>
-    </form>
 </div>
 {% endblock content %}
