@@ -18,6 +18,9 @@
             <a class="button-primary" href="{% url 'registro' %}">Registro</a>
             <a class="button-primary" href="{% url 'inicio_sesion' %}">Iniciar Sesión</a>
             {% endif %}
+            {% if user.is_superuser %}
+            <a class="button-primary" href="{% url 'admin:index' %}">Panel de Administración</a>
+            {% endif %}
         </div>
     </div>
 
