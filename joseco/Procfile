@@ -1,1 +1,1 @@
-web: gunicorn joseco.wsgi
+web: gunicorn joseco.joseco.wsgi
