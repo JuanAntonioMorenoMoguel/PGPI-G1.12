@@ -3,3 +3,6 @@ Django==4.2.16
 sqlparse==0.5.1
 typing-extensions==4.12.2
 tzdata==2024.2
+gunicorn==21.2.0  # Última versión estable de Gunicorn
+whitenoise==6.5.0  # Versión compatible para manejo de estáticos
+dj-database-url==2.0.0  # (Opcional) para manejo de conexiones de bases de datos

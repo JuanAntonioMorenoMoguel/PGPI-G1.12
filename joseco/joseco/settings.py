@@ -54,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'joseco.urls'
@@ -90,9 +91,10 @@ WSGI_APPLICATION = 'joseco.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': '/var/data/db.sqlite3',
     }
 }
+
 
 
 # Password validation
@@ -131,21 +133,18 @@ LOGIN_REDIRECT_URL = 'index'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-# URL para servir archivos estáticos
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Directorio donde Django recopilará todos los archivos estáticos
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Usar WhiteNoise para manejar archivos estáticos en producción
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Directorios adicionales donde buscas archivos estáticos (si tienes una carpeta 'static')
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'daniruiz23.pythonanywhere.com']
+ALLOWED_HOSTS = ['PGPI-G1.12.onrender.com', '127.0.0.1']
+
 
