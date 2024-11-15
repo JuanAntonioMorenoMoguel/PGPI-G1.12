@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-$j+ll5f-dhr*8&b6cix5pjtb*38o77g03jx0!kcv4nd=pt7p^o'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -147,4 +147,5 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ALLOWED_HOSTS = ['DaniRuiz23.pythonanywhere.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'daniruiz23.pythonanywhere.com']
+
