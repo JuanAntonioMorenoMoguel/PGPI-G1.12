@@ -10,7 +10,7 @@ admin.site.unregister(Group)
 
 @admin.register(Curso)
 class CursoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'especialidad', 'modalidad', 'fecha_inicio', 'fecha_finalizacion', 'precio')
+    list_display = ('nombre', 'especialidad', 'modalidad', 'fecha_inicio', 'fecha_finalizacion', 'precio', 'vacantes')
     # search_fields = ('nombre', 'especialidad')
     # list_filter = ('especialidad', 'modalidad', 'fecha_inicio', 'fecha_finalizacion')
 

@@ -43,6 +43,8 @@ class Curso(models.Model):
     # Precio
     precio = models.DecimalField(max_digits=10, decimal_places=2)
 
+    vacantes = models.PositiveIntegerField(default=0, verbose_name="Vacantes disponibles")
+
 
     def __str__(self):
         return self.nombre
@@ -79,7 +81,7 @@ class Horario(models.Model):
         return (fin - inicio).seconds / 3600  # Devuelve las horas
 
     def __str__(self):
-        return f"{self.dia} de {self.hora_inicio.strftime('%H:%M')} a {self.hora_fin.strftime('%H:%M')}"
+        return self.horas_totales()
 
     def clean(self):
         """Valida que no haya solapamiento de horarios en el mismo día."""
