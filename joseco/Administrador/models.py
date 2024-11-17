@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import ValidationError
 
 # Create your models here.
 
@@ -42,10 +43,54 @@ class Curso(models.Model):
     # Precio
     precio = models.DecimalField(max_digits=10, decimal_places=2)
 
+
     def __str__(self):
         return self.nombre
     
     class Meta:
-        app_label = 'auth'  # Asignar la sección "Autenticación y autorización"
+        # app_label = 'auth'  # Asignar la sección "Autenticación y autorización"
         verbose_name = 'Curso'
         verbose_name_plural = 'Cursos'
+
+class DiaSemanaChoices(models.TextChoices):
+    LUNES = 'Lunes'
+    MARTES = 'Martes'
+    MIERCOLES = 'Miércoles'
+    JUEVES = 'Jueves'
+    VIERNES = 'Viernes'
+    SABADO = 'Sábado'
+    DOMINGO = 'Domingo'
+
+class Horario(models.Model):
+    dia = models.CharField(
+        max_length=10,
+        choices=DiaSemanaChoices.choices
+    )
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name='horarios')
+
+    def horas_totales(self):
+        """Devuelve la cantidad de horas entre hora_inicio y hora_fin."""
+        from datetime import datetime
+        fmt = '%H:%M'
+        inicio = datetime.strptime(self.hora_inicio.strftime(fmt), fmt)
+        fin = datetime.strptime(self.hora_fin.strftime(fmt), fmt)
+        return (fin - inicio).seconds / 3600  # Devuelve las horas
+
+    def __str__(self):
+        return f"{self.dia} de {self.hora_inicio.strftime('%H:%M')} a {self.hora_fin.strftime('%H:%M')}"
+
+    def clean(self):
+        """Valida que no haya solapamiento de horarios en el mismo día."""
+        horarios_existentes = self.curso.horarios.filter(dia=self.dia).exclude(pk=self.pk)
+        for horario in horarios_existentes:
+            if (self.hora_inicio < horario.hora_fin and self.hora_fin > horario.hora_inicio):
+                raise ValidationError(f"El horario del día {self.dia} se solapa con {horario}.")
+
+    class Meta:
+        verbose_name = 'Horario'
+        verbose_name_plural = 'Horarios'
+        constraints = [
+            models.UniqueConstraint(fields=['curso', 'dia', 'hora_inicio', 'hora_fin'], name='unique_horario')
+        ]
