@@ -27,5 +27,7 @@ urlpatterns = [
     path('', include('Autenticacion.urls')),
     path('inicio_sesion/', auth_views.LoginView.as_view(template_name='inicio_sesion.html'), name='inicio_sesion'),
     path('cerrar_sesion/', auth_views.LogoutView.as_view(next_page='index'), name='cerrar_sesion'),
+    path('', include('Gestion_Cursos.urls')),
+    
     
 ]

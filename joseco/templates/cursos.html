@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cursos.css' %}">
+{% endblock extra_css %}
+
+
+
+{% block content %}
+<h1 class="titulo">Lista de Cursos</h1>
+
+<!-- Formulario de filtrado -->
+<form method="get" class="form-filters">
+    <div class="filter-group">
+        <label for="id_nombre">Nombre del Curso:</label>
+        <div class="input-wrapper">
+            {{ filtro.form.nombre }}
+            <span class="clear-input" onclick="clearField('id_nombre')">🗑️</span>
+        </div>
+    </div>
+
+    <div class="filter-group">
+        <label for="id_especialidad">Especialidad:</label>
+        {{ filtro.form.especialidad }}
+    </div>
+
+    <div class="filter-group">
+        <label for="id_modalidad">Modalidad:</label>
+        {{ filtro.form.modalidad }}
+    </div>
+
+    <div class="filter-group">
+        <label for="id_fecha_inicio">Fecha de Inicio:</label>
+        {{ filtro.form.fecha_inicio }}
+    </div>
+
+    <div class="filter-group">
+        <label for="id_fecha_finalizacion">Fecha de Fin:</label>
+        {{ filtro.form.fecha_finalizacion }}
+    </div>
+
+    <div class="button-group">
+        <button type="submit" class="btn-filtrar">Filtrar</button>
+        <a href="{% url 'lista_cursos' %}" class="btn-reset">Resetear</a>
+    </div>
+</form>
+
+<div class="tabla-scrollable">
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>Nombre del Curso</th>
+                <th>Especialidad</th>
+                <th>Modalidad</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Finalización</th>
+                <th>Vacantes</th>
+                <th>Detalles</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for curso in cursos %}
+            <tr>
+                <td>{{ curso.nombre }}</td>
+                <td>{{ curso.get_especialidad_display }}</td>
+                <td>{{ curso.get_modalidad_display }}</td>
+                <td>{{ curso.fecha_inicio }}</td>
+                <td>{{ curso.fecha_finalizacion }}</td>
+                <td>{{ curso.vacantes }}</td>
+                <td>
+                    <button class="btn-detalles" onclick="toggleDetails('detalles-{{ curso.id }}')">Ver Detalles</button>
+                </td>
+            </tr>
+            <tr id="detalles-{{ curso.id }}" class="fila-detalles hidden">
+                <td colspan="7">
+                    <div class="detalle-curso">
+                        <p><strong>Precio:</strong> {{ curso.precio }} €</p>
+                        <p><strong>Horarios:</strong></p>
+                        <ul>
+                            {% for horario in curso.horarios.all %}
+                            <li>{{ horario.dia }} de {{ horario.hora_inicio }} a {{ horario.hora_fin }}</li>
+                            {% empty %}
+                            <li>No hay horarios disponibles para este curso.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="no-cursos">No hay cursos disponibles.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function toggleDetails(id) {
+        const detalles = document.getElementById(id);
+        detalles.classList.toggle('hidden');
+    }
+</script>
+
+<script>
+    function clearField(fieldId) {
+        document.getElementById(fieldId).value = '';
+    }
+</script>
+
+
+{% endblock content %}

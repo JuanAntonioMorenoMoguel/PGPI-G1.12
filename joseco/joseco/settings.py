@@ -43,6 +43,10 @@ INSTALLED_APPS = [
     'main',
     'Autenticacion',
     'Administrador',
+    'Gestion_Cursos',
+
+    # Aplicaciones de terceros
+    'django_filters',
 
 ]
 
