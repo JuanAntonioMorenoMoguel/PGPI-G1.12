@@ -18,10 +18,16 @@
     <!-- Barra de navegación -->
     <div class="navbar fixed-top">
         <a href="{% url 'index' %}" class="navbar-logo no-underline">JoseCo</a>
-        <a class="nav-link text-white" href="{% url 'contacto' %}">Contáctanos</a>
-        {% if user.is_authenticated %}
+        
         <div class="navbar-menu">
+            <a class="nav-link text-white" href="{% url 'contacto' %}">Contáctanos</a>
+            {% if user.is_authenticated %}
+            <a class="nav-link text-white" href="{% url 'lista_cursos' %}">Cursos Disponibles</a>
             <a class="nav-link text-white" href="{% url 'perfil' %}">{{ user.email }}</a>
+            <a href="{% url 'ver_carrito' %}" class="nav-link text-white">
+                🛒 Ver Carrito <span id="carrito-cantidad">0</span>
+            </a>
+            
             <form action="{% url 'cerrar_sesion' %}" method="post" style="display: inline;">
                 {% csrf_token %}
                 <button type="submit" class="nav-link text-white"
@@ -29,12 +35,33 @@
                     Cerrar Sesión
                 </button>
             </form>
+            {% endif %}
         </div>
-        {% endif %}
+        
     </div>
 
     {% block content %}{% endblock content %}
 
 </body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch('/carrito-cantidad/', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const carritoCantidad = document.getElementById('carrito-cantidad');
+            if (carritoCantidad) {
+                carritoCantidad.textContent = data.carrito_cantidad;
+            }
+        })
+        .catch(error => console.error('Error al inicializar el carrito:', error));
+    });
+</script>
+
 
 </html>

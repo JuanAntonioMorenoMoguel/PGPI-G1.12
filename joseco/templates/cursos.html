@@ -57,6 +57,7 @@
                 <th>Fecha Finalización</th>
                 <th>Vacantes</th>
                 <th>Detalles</th>
+                <th>Reservar Curso</th>
             </tr>
         </thead>
         <tbody>
@@ -71,6 +72,15 @@
                 <td>
                     <button class="btn-detalles" onclick="toggleDetails('detalles-{{ curso.id }}')">Ver Detalles</button>
                 </td>
+                
+                <td>
+                    <form method="post" action="{% url 'agregar_a_carrito' curso.id %}" class="form-reserva" data-curso-id="{{ curso.id }}">
+                        {% csrf_token %}
+                        <button type="button" class="btn-reserva" onclick="reservarCurso({{ curso.id }})">Reservar curso</button>
+                    </form>
+                </td>
+                
+                
             </tr>
             <tr id="detalles-{{ curso.id }}" class="fila-detalles hidden">
                 <td colspan="7">
@@ -107,6 +117,34 @@
     function clearField(fieldId) {
         document.getElementById(fieldId).value = '';
     }
+</script>
+
+<script>
+    function reservarCurso(cursoId) {
+        const url = `/agregar-a-carrito/${cursoId}/`;
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message); // Opcional: mostrar un mensaje al usuario
+            }
+            // Actualizar el contador del carrito
+            const carritoCantidad = document.getElementById('carrito-cantidad');
+            if (carritoCantidad) {
+                carritoCantidad.textContent = data.carrito_cantidad;
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
 </script>
 
 

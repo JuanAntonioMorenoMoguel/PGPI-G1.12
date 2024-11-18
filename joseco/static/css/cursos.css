@@ -1,5 +1,6 @@
 /* Título centrado */
 .titulo {
+    margin-top: 80px;
     text-align: center;
     margin-bottom: 100px;
     font-size: 2rem;
@@ -58,6 +59,35 @@ max-height: calc(100vh - 180px); /* Espacio dinámico: ocupa lo máximo posible 
 .btn-detalles:hover {
     background-color: #0056b3;
 }
+
+/* Botón de detalles */
+.btn-reserva {
+    background-color: #00ff40;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.btn-reserva:hover {
+    background-color: #009a26;
+}
+
+.btn-confirmar {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
 
 /* Fila de detalles oculta por defecto */
 .fila-detalles {
