@@ -17,6 +17,7 @@
     <!-- Barra de navegación -->
     <div class="navbar fixed-top">
         <a href="{% url 'index' %}" class="navbar-logo no-underline">JoseCo</a>
+        <a class="nav-link text-white" href="{% url 'contacto' %}">Contáctanos</a>
         {% if user.is_authenticated %}
         <div class="navbar-menu">
             <a class="nav-link text-white" href="{% url 'perfil' %}">{{ user.email }}</a>
