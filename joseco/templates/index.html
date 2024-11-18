@@ -14,13 +14,21 @@
             <p>Desde JoseCo nos aseguramos de que cualquiera pueda estudiar para las oposiciones desde la comodidad de
                 su
                 sillón.</p>
+            {% if user.is_authenticated %}
+            <p>Bienvenido, {{ user.first_name }}!</p>
+            {% endif %}
+            
             {% if not user.is_authenticated %}
             <a class="button-primary" href="{% url 'registro' %}">Registro</a>
             <a class="button-primary" href="{% url 'inicio_sesion' %}">Iniciar Sesión</a>
             {% endif %}
+            {% if user.is_authenticated %}
+            <a class="button-primary" href="{% url 'lista_cursos' %}">Cursos</a>
+            {% endif %}
             {% if user.is_superuser %}
             <a class="button-primary" href="{% url 'admin:index' %}">Panel de Administración</a>
             {% endif %}
+
         </div>
     </div>
 
