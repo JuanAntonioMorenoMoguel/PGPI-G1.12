@@ -2,15 +2,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 from .models import Curso, Carrito
 from .filters import CursoFilter
 
 def lista_cursos(request):
     cursos = Curso.objects.all()  # Recuperar todos los cursos
+    carrito = Carrito.objects.filter(usuario=request.user).values_list('curso', flat=True)
     filtro=CursoFilter(request.GET, queryset=cursos)
     cursos_filtrados=filtro.qs
 
-    return render(request, 'cursos.html', {'cursos': cursos_filtrados, 'filtro':filtro})
+    return render(request, 'cursos.html', {'cursos': cursos_filtrados, 'filtro':filtro, 'carrito': list(carrito)})
 
 
 
@@ -27,6 +29,16 @@ def agregar_a_carrito(request, curso_id):
         return JsonResponse({"message": "Curso añadido al carrito", "carrito_cantidad": Carrito.objects.filter(usuario=request.user).count()})
     
     return redirect('ver_carrito')  # Redirección si no es AJAX
+
+@login_required
+@require_http_methods(["DELETE"])
+def eliminar_de_carrito(request, curso_id):
+    try:
+        item = Carrito.objects.get(id=curso_id)
+        item.delete()
+        return JsonResponse({'message': 'Curso eliminado del carrito.'})
+    except Carrito.DoesNotExist:
+        return JsonResponse({'message': 'El curso no existe en el carrito.'}, status=404)
 
 @login_required
 def ver_carrito(request):

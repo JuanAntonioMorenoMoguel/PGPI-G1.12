@@ -13,22 +13,61 @@
 <table class="custom-table">
     <thead>
         <tr>
+            <th>Seleccionar</th>
             <th>Nombre del Curso</th>
             <th>Cantidad</th>
             <th>Precio</th>
+            <th>Eliminar curso</th>
         </tr>
     </thead>
     <tbody>
         {% for item in carrito %}
         <tr>
+            <td><input type="checkbox" name="seleccionar" value="{{ item.id }}" onchange="toggleRowSelection(this)"></td>
             <td>{{ item.curso.nombre }}</td>
             <td>{{ item.cantidad }}</td>
             <td>{{ item.curso.precio }} €</td>
-
+            <td>
+                <button type="button" class="btn-reserva" onclick="eliminar-de-carrito({{ curso.id }})">Eliminar</button>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<a href="{% url 'confirmar_reserva' %}" class="btn-confirmar">Confirmar Reserva</a>
+<a href="{% url 'confirmar_reserva' %}" class="btn-confirmar">Reservar cursos seleccionados</a>
+
+<script>
+    function toggleRowSelection(checkbox) {
+        const row = checkbox.closest('tr');
+        if (checkbox.checked) {
+            row.classList.add('selected-row');
+        } else {
+            row.classList.remove('selected-row');
+        }
+    }
+
+    function eliminarDeCarrito(cursoId) {
+        const url = `/eliminar-de-carrito/${cursoId}/`;
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+        fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message); // Opcional: mostrar un mensaje al usuario
+            }
+            // Actualizar la página o eliminar la fila del curso
+            location.reload(); // Recargar la página para reflejar los cambios
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+
 {% endblock content %}

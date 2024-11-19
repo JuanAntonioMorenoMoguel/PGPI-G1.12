@@ -25,7 +25,7 @@
             <a class="nav-link text-white" href="{% url 'lista_cursos' %}">Cursos Disponibles</a>
             <a class="nav-link text-white" href="{% url 'perfil' %}">{{ user.email }}</a>
             <a href="{% url 'ver_carrito' %}" class="nav-link text-white">
-                🛒 Ver Carrito <span id="carrito-cantidad">0</span>
+                🛒 Ver Cesta <span id="carrito-cantidad">0</span>
             </a>
             
             <form action="{% url 'cerrar_sesion' %}" method="post" style="display: inline;">

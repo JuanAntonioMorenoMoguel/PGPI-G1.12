@@ -76,7 +76,13 @@
                 <td>
                     <form method="post" action="{% url 'agregar_a_carrito' curso.id %}" class="form-reserva" data-curso-id="{{ curso.id }}">
                         {% csrf_token %}
-                        <button type="button" class="btn-reserva" onclick="reservarCurso({{ curso.id }})">Reservar curso</button>
+                        {% if curso.vacantes > 0 and curso.id not in carrito %}
+                            <button type="button" class="btn-reserva" onclick="reservarCurso({{ curso.id }})">Añadir al carrito</button>
+                        {% elif curso.id in carrito %}
+                            <button type="button" class="btn-reserva" disabled>Ya está en el carrito</button>
+                        {% else %}
+                            <button type="button" class="btn-reserva" disabled>No hay plazas para este curso</button>
+                        {% endif %}
                     </form>
                 </td>
                 
@@ -134,13 +140,14 @@
         .then(response => response.json())
         .then(data => {
             if (data.message) {
-                alert(data.message); // Opcional: mostrar un mensaje al usuario
+                //alert(data.message); // Opcional: mostrar un mensaje al usuario
             }
             // Actualizar el contador del carrito
             const carritoCantidad = document.getElementById('carrito-cantidad');
             if (carritoCantidad) {
                 carritoCantidad.textContent = data.carrito_cantidad;
             }
+            location.reload();
         })
         .catch(error => console.error('Error:', error));
     }
