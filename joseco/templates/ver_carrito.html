@@ -28,7 +28,7 @@
             <td>{{ item.cantidad }}</td>
             <td>{{ item.curso.precio }} €</td>
             <td>
-                <button type="button" class="btn-reserva" onclick="eliminar-de-carrito({{ curso.id }})">Eliminar</button>
+                <a href="{% url 'eliminar_de_carrito' item.curso.id %}" class="btn-reserva">Eliminar</a>
             </td>
         </tr>
         {% endfor %}
@@ -45,28 +45,6 @@
         } else {
             row.classList.remove('selected-row');
         }
-    }
-
-    function eliminarDeCarrito(cursoId) {
-        const url = `/eliminar-de-carrito/${cursoId}/`;
-        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
-
-        fetch(url, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRFToken': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                alert(data.message); // Opcional: mostrar un mensaje al usuario
-            }
-            // Actualizar la página o eliminar la fila del curso
-            location.reload(); // Recargar la página para reflejar los cambios
-        })
-        .catch(error => console.error('Error:', error));
     }
 </script>
 

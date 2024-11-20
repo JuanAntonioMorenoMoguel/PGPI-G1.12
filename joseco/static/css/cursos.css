@@ -9,7 +9,8 @@
 
 /* Contenedor con scroll */
 .tabla-scrollable {
-max-height: calc(100vh - 180px); /* Espacio dinámico: ocupa lo máximo posible */
+    max-height: calc(100vh - 180px);
+    /* Espacio dinámico: ocupa lo máximo posible */
     overflow-y: auto;
     margin: 0 auto;
     width: 95%;
@@ -24,7 +25,8 @@ max-height: calc(100vh - 180px); /* Espacio dinámico: ocupa lo máximo posible 
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.custom-table th, .custom-table td {
+.custom-table th,
+.custom-table td {
     border: 1px solid #ddd;
     padding: 12px 15px;
     text-align: center;
@@ -79,7 +81,8 @@ max-height: calc(100vh - 180px); /* Espacio dinámico: ocupa lo máximo posible 
 .btn-confirmar {
     background-color: #4CAF50;
     color: white;
-    padding: 10px 20px;
+    padding: 5px 10px;
+    border-radius: 5px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -91,12 +94,14 @@ max-height: calc(100vh - 180px); /* Espacio dinámico: ocupa lo máximo posible 
 
 /* Fila de detalles oculta por defecto */
 .fila-detalles {
-    display: table-row; /* Muestra como fila cuando no está oculta */
+    display: table-row;
+    /* Muestra como fila cuando no está oculta */
     background-color: #f4f4f4;
 }
 
 .fila-detalles.hidden {
-    display: none; /* Oculta completamente la fila */
+    display: none;
+    /* Oculta completamente la fila */
 }
 
 /* Mensaje para cuando no hay cursos */
@@ -109,7 +114,8 @@ max-height: calc(100vh - 180px); /* Espacio dinámico: ocupa lo máximo posible 
 
 .detalle-curso {
     text-align: left;
-    padding-left: 20px; /* Margen izquierdo para mejor visibilidad */
+    padding-left: 20px;
+    /* Margen izquierdo para mejor visibilidad */
     font-size: 14px;
 }
 
@@ -122,8 +128,10 @@ max-height: calc(100vh - 180px); /* Espacio dinámico: ocupa lo máximo posible 
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
-    justify-content: center; /* Centra todo el formulario horizontalmente */
-    text-align: left; /* Asegura que las etiquetas e inputs estén alineados a la izquierda */
+    justify-content: center;
+    /* Centra todo el formulario horizontalmente */
+    text-align: left;
+    /* Asegura que las etiquetas e inputs estén alineados a la izquierda */
 }
 
 .filter-group {
@@ -134,26 +142,35 @@ max-height: calc(100vh - 180px); /* Espacio dinámico: ocupa lo máximo posible 
 
 .filter-group label {
     font-weight: bold;
-    margin-bottom: 5px; /* Espacio entre el label y el input */
-    text-align: left; /* Asegura que las etiquetas se alineen a la izquierda */
+    margin-bottom: 5px;
+    /* Espacio entre el label y el input */
+    text-align: left;
+    /* Asegura que las etiquetas se alineen a la izquierda */
 }
 
 .input-wrapper {
     position: relative;
-    width: 100%; /* Asegura que el input ocupa el espacio adecuado */
+    width: 100%;
+    /* Asegura que el input ocupa el espacio adecuado */
 }
 
-input[type="text"], input[type="date"], select {
-    width: 200px; /* Ajusta el ancho según lo que necesites */
+input[type="text"],
+input[type="date"],
+select {
+    width: 200px;
+    /* Ajusta el ancho según lo que necesites */
     padding: 10px;
-    padding-right: 35px; /* Deja espacio para la papelera */
+    padding-right: 35px;
+    /* Deja espacio para la papelera */
     font-size: 14px;
-    text-align: left; /* Centra el texto dentro del input a la izquierda */
+    text-align: left;
+    /* Centra el texto dentro del input a la izquierda */
 }
 
 .clear-input {
     position: absolute;
-    right: 10px; /* Ubica la papelera dentro del input */
+    right: 10px;
+    /* Ubica la papelera dentro del input */
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
@@ -162,7 +179,8 @@ input[type="text"], input[type="date"], select {
 }
 
 .clear-input:hover {
-    color: #333; /* Cambia el color al pasar el cursor */
+    color: #333;
+    /* Cambia el color al pasar el cursor */
 }
 
 /* Grupo de botones */
@@ -171,14 +189,19 @@ input[type="text"], input[type="date"], select {
 /* Contenedor para centrar el grupo de botones */
 .button-group {
     display: flex;
-    gap: 10px; /* Espacio entre los botones */
-    justify-content: center; /* Centra los botones horizontalmente */
-    align-items: center; /* Asegura que estén alineados verticalmente */
-    margin-top: 10px; /* Espacio superior para separar los botones del resto del formulario */
+    gap: 10px;
+    /* Espacio entre los botones */
+    justify-content: center;
+    /* Centra los botones horizontalmente */
+    align-items: center;
+    /* Asegura que estén alineados verticalmente */
+    margin-top: 10px;
+    /* Espacio superior para separar los botones del resto del formulario */
 }
 
 /* Botón de Filtrar */
-.btn-filtrar, .btn-reset {
+.btn-filtrar,
+.btn-reset {
     padding: 5px 10px;
     font-size: 14px;
     border: none;
@@ -209,9 +232,3 @@ input[type="text"], input[type="date"], select {
 .btn-reset:hover {
     background-color: #d32f2f;
 }
-
-
-
-
-
-

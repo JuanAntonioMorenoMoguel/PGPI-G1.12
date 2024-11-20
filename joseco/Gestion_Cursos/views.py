@@ -31,14 +31,10 @@ def agregar_a_carrito(request, curso_id):
     return redirect('ver_carrito')  # Redirección si no es AJAX
 
 @login_required
-@require_http_methods(["DELETE"])
 def eliminar_de_carrito(request, curso_id):
-    try:
-        item = Carrito.objects.get(id=curso_id)
-        item.delete()
-        return JsonResponse({'message': 'Curso eliminado del carrito.'})
-    except Carrito.DoesNotExist:
-        return JsonResponse({'message': 'El curso no existe en el carrito.'}, status=404)
+    item = get_object_or_404(Carrito, usuario=request.user, curso=curso_id)
+    item.delete()
+    return redirect('ver_carrito')
 
 @login_required
 def ver_carrito(request):
