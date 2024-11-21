@@ -48,7 +48,7 @@ def confirmar_reserva(request):
         if item.curso.vacantes >= item.cantidad:
             item.curso.vacantes -= item.cantidad
             item.curso.save()
-        item.delete()
+            item.delete()  # Solo eliminar si la reserva se confirmó correctamente
     return redirect('lista_cursos')
 
     
