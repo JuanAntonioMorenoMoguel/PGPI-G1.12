@@ -1,0 +1,98 @@
+/* Contenedor de la tabla */
+.table-container {
+    margin: 30px auto;
+    max-width: 90%;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+/* Título */
+h1.titulo {
+    text-align: center;
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* Estilo general de la tabla */
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.custom-table th {
+    background-color: #4CAF50;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.custom-table td {
+    padding: 10px;
+    font-size: 13px;
+    color: #333;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.custom-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.custom-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Botones */
+.btn {
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+/* Botones específicos */
+.btn-azul {
+    background-color: #007bff;
+}
+
+.btn-azul:hover {
+    background-color: #0056b3;
+}
+
+.btn-rojo {
+    background-color: #dc3545;
+}
+
+.btn-rojo:hover {
+    background-color: #b52a36;
+}
+
+.btn-verde {
+    background-color: #28a745;
+}
+
+.btn-verde:hover {
+    background-color: #218838;
+}
+
+/* Enlace para crear */
+a.btn-verde {
+    display: inline-block;
+    margin-top: 15px;
+    text-align: center;
+}

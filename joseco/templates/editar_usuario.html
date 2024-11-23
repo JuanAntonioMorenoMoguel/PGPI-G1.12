@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/registro.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Editar Usuario</h2>
+    <form method="post" class="form-editar">
+        {% csrf_token %}
+        
+        <!-- Formulario renderizado -->
+        <div class="form-group">
+            <label for="id_first_name">Nombre:</label>
+            {{ form.first_name }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_last_name">Apellidos:</label>
+            {{ form.last_name }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_email">Correo Electrónico:</label>
+            {{ form.email }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_password">Cambiar Contraseña (opcional):</label>
+            {{ form.password }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_is_superuser">¿Es Superusuario?</label>
+            {{ form.is_superuser }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_is_active">¿Está Activo?</label>
+            {{ form.is_active }}
+        </div>
+        
+        <!-- Botones -->
+        <div class="button-group">
+            <button type="submit" class="btn">Guardar Cambios</button>
+            <a href="{% url 'admin_usuarios' %}" class="btn btn-cancelar">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

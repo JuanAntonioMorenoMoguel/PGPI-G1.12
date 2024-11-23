@@ -1,0 +1,84 @@
+/* Botón de edición en la tabla */
+.btn-editar {
+    padding: 5px 10px;
+    background-color: #007bff; /* Azul */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-editar:hover {
+    background-color: #0056b3; /* Azul más oscuro */
+}
+
+/* Botones del formulario */
+.btn-guardar, .btn-cancelar {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin: 10px;
+}
+
+.btn-guardar {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+}
+
+.btn-guardar:hover {
+    background-color: #45a049;
+}
+
+/* Botón de cancelar */
+.btn-cancelar {
+    background-color: #f44336; /* Rojo */
+    color: white;
+    text-align: center;
+    padding: 10px;
+    display: inline-block;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-cancelar:hover {
+    background-color: #d32f2f;
+}
+
+/* Ajustes específicos para el formulario de edición */
+.form-group input[disabled] {
+    background-color: #e9ecef; /* Fondo gris claro para campos deshabilitados */
+    color: #495057; /* Texto gris oscuro */
+    cursor: not-allowed;
+    border: 1px solid #ced4da; /* Borde consistente */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333; /* Etiquetas en gris oscuro */
+}
+
+button.btn {
+    margin-top: 20px;
+}
+
+.btn-cancelar {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    border: 1px solid #f5c6cb;
+    transition: background-color 0.3s ease;
+}
+
+.btn-cancelar:hover {
+    background-color: #f1b0b7;
+}

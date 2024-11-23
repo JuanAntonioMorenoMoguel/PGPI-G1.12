@@ -6,6 +6,7 @@ from django.forms import ValidationError
 class Curso(models.Model):
     # Campo Nombre
     nombre = models.CharField(max_length=200)
+    
 
     # Enumerado para Especialidad
     class EspecialidadChoices(models.TextChoices):
@@ -96,3 +97,5 @@ class Horario(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['curso', 'dia', 'hora_inicio', 'hora_fin'], name='unique_horario')
         ]
+
+    

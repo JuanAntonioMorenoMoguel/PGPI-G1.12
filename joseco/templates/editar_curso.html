@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Editar Curso</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_nombre">Nombre del Curso:</label>
+            {{ form.nombre }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_especialidad">Especialidad:</label>
+            {{ form.especialidad }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_modalidad">Modalidad:</label>
+            {{ form.modalidad }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_fecha_inicio">Fecha de Inicio:</label>
+            {{ form.fecha_inicio }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_fecha_finalizacion">Fecha de Finalización:</label>
+            {{ form.fecha_finalizacion }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_precio">Precio (€):</label>
+            {{ form.precio }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_vacantes">Vacantes:</label>
+            {{ form.vacantes }}
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="btn">Guardar Cambios</button>
+            <a href="{% url 'admin_cursos' %}" class="btn btn-cancelar">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
