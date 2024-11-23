@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{%load static%}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="admin-container">
+    <!-- Encabezado -->
+    <h1 class="admin-header">Panel de Administración</h1>
+
+    <!-- Saludo -->
+    <p class="admin-welcome">Bienvenido, {{ request.user.username }}</p>
+
+    <!-- Botones -->
+    <div class="admin-buttons">
+        <a class="button-primary" href="{% url 'admin_usuarios' %}">Usuarios</a>
+        <a class="button-primary" href="{% url 'admin_cursos' %}">Cursos</a>
+        <a class="button-primary" href="{% url 'admin_horarios' %}">Horarios</a>
+    </div>
+</div>
+{% endblock %}

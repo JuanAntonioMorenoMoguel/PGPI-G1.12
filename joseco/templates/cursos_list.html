@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/table.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="table-container">
+    <h1 class="titulo">Lista de Cursos</h1>
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Especialidad</th>
+                <th>Modalidad</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Finalización</th>
+                <th>Vacantes</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for curso in cursos %}
+            <tr>
+                <td>{{ curso.id }}</td>
+                <td>{{ curso.nombre }}</td>
+                <td>{{ curso.get_especialidad_display }}</td>
+                <td>{{ curso.get_modalidad_display }}</td>
+                <td>{{ curso.fecha_inicio }}</td>
+                <td>{{ curso.fecha_finalizacion }}</td>
+                <td>{{ curso.vacantes }}</td>
+                <td>{{ curso.precio }} €</td>
+                <td>
+                    <a href="{% url 'editar_curso' curso.id %}" class="btn btn-azul">Editar</a>
+                    <form method="post" action="{% url 'eliminar_curso' curso.id %}" class="btn-eliminar-form" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este curso?');" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-rojo">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9">No hay cursos disponibles.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="{% url 'crear_curso' %}" class="btn btn-verde">+ Crear Curso</a>
+    </div>
+</div>
+{% endblock %}

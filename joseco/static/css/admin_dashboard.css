@@ -1,0 +1,59 @@
+/* General */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Contenedor del panel */
+.admin-container {
+    text-align: center;
+    padding: 20px;
+    max-width: 600px;
+    background-color: #ffffff; /* Fondo blanco */
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Título */
+.admin-header {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Saludo */
+.admin-welcome {
+    font-size: 1.3rem;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+/* Botones */
+.admin-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.button-primary {
+    padding: 15px 30px;
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+.button-primary:hover {
+    background-color: #45a049; /* Verde más oscuro */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+

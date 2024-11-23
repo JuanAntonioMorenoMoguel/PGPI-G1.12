@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{%load static%}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="form-container">
+    <h2>{% if form.instance.pk %}Editar Horario{% else %}Crear Horario{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_curso">Curso:</label>
+            {{ form.curso }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_dia">Día:</label>
+            {{ form.dia }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_hora_inicio">Hora de Inicio:</label>
+            <input type="text" name="hora_inicio" placeholder="00:00" id="id_hora_inicio" class="form-control">
+        </div>
+        
+        <div class="form-group">
+            <label for="id_hora_fin">Hora de Fin:</label>
+            <input type="text" name="hora_fin" placeholder="00:00" id="id_hora_fin" class="form-control">
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="btn">Crear</button>
+            <a href="{% url 'admin_horarios' %}" class="btn btn-cancelar">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

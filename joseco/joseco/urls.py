@@ -21,8 +21,11 @@ from django.contrib import admin
 from django.urls import include, path
 from django.contrib.auth import views as auth_views
 
+from Administrador import views
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', include('Administrador.urls')),
+  # La URL /admin/ apunta a Administrador
     path('', include('main.urls')),  # La URL raíz del proyecto apunta a main
     path('', include('Autenticacion.urls')),
     path('inicio_sesion/', auth_views.LoginView.as_view(template_name='inicio_sesion.html'), name='inicio_sesion'),
