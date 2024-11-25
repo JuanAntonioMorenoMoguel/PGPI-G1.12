@@ -24,18 +24,21 @@ body {
     margin-bottom: 20px;
 }
 
-.datos-curso, .datos-pago {
+.datos-curso,
+.datos-pago {
     margin-bottom: 20px;
     text-align: left;
 }
 
-.datos-curso h3, .datos-pago h3 {
+.datos-curso h3,
+.datos-pago h3 {
     margin-bottom: 10px;
     border-bottom: 2px solid #ddd;
     padding-bottom: 5px;
 }
 
-.datos-curso p, .datos-pago p {
+.datos-curso p,
+.datos-pago p {
     margin: 5px 0;
 }
 
@@ -47,6 +50,7 @@ body {
 .firma p {
     margin: 5px 0;
 }
+
 /* Título */
 .titulo {
     font-size: 24px;
@@ -56,8 +60,10 @@ body {
 
 /* Contenedor scrollable */
 .scrollable-recibos {
-    max-height: 400px; /* Altura máxima antes de habilitar el scroll */
-    overflow-y: auto; /* Scroll vertical */
+    max-height: 400px;
+    /* Altura máxima antes de habilitar el scroll */
+    overflow-y: auto;
+    /* Scroll vertical */
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 10px;
@@ -92,4 +98,18 @@ body {
     margin-top: 20px;
 }
 
+.spacing {
+    margin-top: 30px;
+    /* Espacio entre elementos */
+}
 
+
+.fondo-blanco {
+    background-color: #ffffff;
+    /* Blanco */
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 2px solid #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}

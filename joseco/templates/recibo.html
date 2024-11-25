@@ -25,6 +25,7 @@
         <p><strong>Nombre Completo:</strong> {{ recibo.usuario.first_name }} {{ recibo.usuario.last_name }}</p>
         <p><strong>Email:</strong> {{ recibo.usuario.email }}</p>
         <p><strong>Importe:</strong> {{ recibo.importe }} €</p>
+        <p><strong>Método de Pago:</strong> {{ recibo.metodo_pago }}</p>
         <p><strong>Fecha de Pago:</strong> {{ recibo.fecha_pago|date:"d/m/Y H:i" }}</p>
     </div>
 </div>

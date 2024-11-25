@@ -36,39 +36,33 @@
 
 <script>
     function validarFormulario(event) {
-        const form = event.target;
-
         // Validar la fecha de expiración
         const expiryDate = document.getElementById('expiry_date').value;
         const [month, year] = expiryDate.split('/').map(Number);
         const now = new Date();
         const currentMonth = now.getMonth() + 1; // Mes actual (1-12)
         const currentYear = now.getFullYear() % 100; // Últimos dos dígitos del año
-
+    
         if (year < currentYear || (year === currentYear && month < currentMonth)) {
             alert('La fecha de expiración debe ser posterior a la fecha actual.');
+            event.preventDefault(); // Evita el envío
             return false;
         }
-
+    
         // Validar el nombre en la tarjeta
         const cardName = document.getElementById('card_name').value.trim();
         const namePattern = /^[A-Za-z\s'-]+$/;
-
+    
         if (!namePattern.test(cardName)) {
             alert('El nombre debe contener solo letras, espacios, apóstrofes o guiones. No debe contener números.');
+            event.preventDefault(); // Evita el envío
             return false;
         }
-
-        // Verificar otros campos (opcional: confía en el navegador para validarlos)
-        if (!form.checkValidity()) {
-            alert('Por favor, complete todos los campos correctamente.');
-            return false;
-        }
-
-        // Si todo es válido, redirigir
-        window.location.href = form.dataset.redirectUrl;
-        return false; // Previene el envío estándar del formulario
+    
+        // Si todo es válido, el formulario se envía normalmente
+        return true;
     }
+    
 </script>
 
 

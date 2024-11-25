@@ -69,18 +69,35 @@ def resumen_compra(request, curso_id):
 def datos_pago(request, curso_id):
     curso = get_object_or_404(Curso, id=curso_id)
 
+    if request.method == 'POST':
+        # Crear un recibo en la base de datos
+        recibo = Recibo.objects.create(
+            usuario=request.user,
+            curso=curso,
+            fecha_pago=now(),
+            importe=curso.precio,
+            metodo_pago="Tarjeta"
+        )
+
+        return redirect('recibo', recibo_id=recibo.id)
+
+    # Si no es POST, simplemente muestra el formulario de pago
+    return render(request, 'datos_pago.html', {'curso': curso})
+
+@login_required
+def pago_efectivo(request, curso_id):
+    curso = get_object_or_404(Curso, id=curso_id)
+
     # Crear un recibo en la base de datos
     recibo = Recibo.objects.create(
-        usuario=request.user,
-        curso=curso,
-        fecha_pago=now(),
-        importe=curso.precio
-    )
+            usuario=request.user,
+            curso=curso,
+            fecha_pago=now(),
+            importe=curso.precio,
+            metodo_pago="Efectivo"
+        )
 
-        # Redirigir al recibo generado
     return redirect('recibo', recibo_id=recibo.id)
-
-
 
 @login_required
 def recibo(request, recibo_id):

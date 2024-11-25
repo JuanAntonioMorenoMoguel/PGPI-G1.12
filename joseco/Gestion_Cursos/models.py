@@ -16,5 +16,6 @@ class Recibo(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recibos')
     fecha_pago = models.DateTimeField()
     importe = models.DecimalField(max_digits=8, decimal_places=2)
+    metodo_pago = models.CharField(max_length=50)
 
     
