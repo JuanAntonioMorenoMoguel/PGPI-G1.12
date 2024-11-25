@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/resumen_compra.css' %}">
+  <link rel="stylesheet" href="{% static 'css/estilosbase.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="form-container mt-5">
+        <h2>Resumen de pago</h2>
+        
+        <form method="post" action="{% url 'datos_pago' curso.id %}" onsubmit="return validarFormulario(event)" data-redirect-url="{% url 'recibo' curso.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="card_name">Nombre en la tarjeta</label>
+                <input type="text" id="card_name" name="card_name" class="form-control" required pattern="[A-Za-z\s'-]+" title="El nombre debe contener solo letras, espacios, apóstrofes o guiones y no debe contener números">
+            </div>
+            <div class="form-group">
+                <label for="card_number">Número de tarjeta</label>
+                <input type="text" id="card_number" name="card_number" class="form-control" required pattern="\d{16}" title="El número de tarjeta debe contener 16 dígitos">
+            </div>
+            <div class="form-group">
+                <label for="expiry_date">Fecha de expiración (MM/AA)</label>
+                <input type="text" id="expiry_date" name="expiry_date" class="form-control" required pattern="(0[1-9]|1[0-2])\/\d{2}" title="La fecha de expiración debe estar en el formato MM/AA">
+            </div>
+            <div class="form-group">
+                <label for="cvv">CVV</label>
+                <input type="text" id="cvv" name="cvv" class="form-control" required pattern="\d{3,4}" title="El CVV debe contener 3 o 4 dígitos">
+            </div>
+            <button type="submit" class="button-primary">Finalizar compra</button>
+        </form>
+
+</div>
+
+<script>
+    function validarFormulario(event) {
+        const form = event.target;
+
+        // Validar la fecha de expiración
+        const expiryDate = document.getElementById('expiry_date').value;
+        const [month, year] = expiryDate.split('/').map(Number);
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1; // Mes actual (1-12)
+        const currentYear = now.getFullYear() % 100; // Últimos dos dígitos del año
+
+        if (year < currentYear || (year === currentYear && month < currentMonth)) {
+            alert('La fecha de expiración debe ser posterior a la fecha actual.');
+            return false;
+        }
+
+        // Validar el nombre en la tarjeta
+        const cardName = document.getElementById('card_name').value.trim();
+        const namePattern = /^[A-Za-z\s'-]+$/;
+
+        if (!namePattern.test(cardName)) {
+            alert('El nombre debe contener solo letras, espacios, apóstrofes o guiones. No debe contener números.');
+            return false;
+        }
+
+        // Verificar otros campos (opcional: confía en el navegador para validarlos)
+        if (!form.checkValidity()) {
+            alert('Por favor, complete todos los campos correctamente.');
+            return false;
+        }
+
+        // Si todo es válido, redirigir
+        window.location.href = form.dataset.redirectUrl;
+        return false; // Previene el envío estándar del formulario
+    }
+</script>
+
+
+
+{% endblock content %}

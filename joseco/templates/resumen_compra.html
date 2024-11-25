@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/resumen_compra.css' %}">
+  <link rel="stylesheet" href="{% static 'css/estilosbase.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="form-container mt-5">
+        <h2>Resumen de compra</h2>
+        
+        <div class="contact-info mt-5">
+            <p><strong>Nombre del curso:</strong> {{ curso.nombre }}</p>
+            <p><strong>Especialidad:</strong> {{ curso.especialidad }}</p>
+            <p><strong>Modalidad:</strong> {{ curso.modalidad }}</p>
+            <p><strong>Fecha de inicio:</strong> {{ curso.fecha_inicio }}</p>
+            <p><strong>Fecha de finalización:</strong> {{ curso.fecha_finalizacion }}</p>
+            <p><strong>Horarios:</strong></p>
+            <div class="horarios">
+                {% for horario in curso.horarios.all %}
+                <p>{{ horario.dia }} de {{ horario.hora_inicio }} a {{ horario.hora_fin }}</p>
+                {% empty %}
+                <p>No hay horarios disponibles para este curso.</p>
+                {% endfor %}
+            </div>
+            <p><strong>Precio:</strong> {{ curso.precio }} €</p>
+        </div>
+    </div>
+    
+    <div class="form-container mt-5">
+        <h2>Información del usuario</h2>
+        <div class="user-info mt-5">  
+            <p><strong>Nombre:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+        </div>
+    </div>
+
+    <a class="button-primary" href="{% url 'datos_pago' curso.id %}">Pagar con tarjeta</a>
+    <a class="button-primary" href="{% url 'recibo' curso.id %}">Pago en efectivo</a>
+</div>
+
+{% endblock content %}
