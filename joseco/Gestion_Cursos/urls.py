@@ -9,4 +9,9 @@ urlpatterns = [
     path('confirmar-reserva/', views.confirmar_reserva, name='confirmar_reserva'),
     path('carrito-cantidad/', views.carrito_cantidad, name='carrito_cantidad'),
     path('eliminar-de-carrito/<int:curso_id>/', views.eliminar_de_carrito, name='eliminar_de_carrito'),
+    path('resumen_compra/<int:curso_id>/', views.resumen_compra, name='resumen_compra'),
+    path('datos_pago/<int:curso_id>/', views.datos_pago, name='datos_pago'),
+    path('recibo/<int:recibo_id>/', views.recibo, name='recibo'),
+    path('mis_recibos/', views.mis_recibos, name='mis_recibos'),
+    path('pago_efectivo/<int:curso_id>/', views.pago_efectivo, name='pago_efectivo'),
 ]

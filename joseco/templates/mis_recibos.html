@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/mis_recibos.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="recibos-container">
+    <h2 class="titulo">Mis Recibos</h2>
+
+    <!-- Contenedor con scrollbar -->
+    <div class="scrollable-recibos">
+        {% for recibo in recibos %}
+        <div class="datos-curso fondo-blanco">
+            <h3>Datos del Curso</h3>
+            <p><strong>Nombre del Curso:</strong> {{ recibo.curso.nombre }}</p>
+            <p><strong>Especialidad:</strong> {{ recibo.curso.get_especialidad_display }}</p>
+            <p><strong>Modalidad:</strong> {{ recibo.curso.get_modalidad_display }}</p>
+            <p><strong>Fecha de Inicio:</strong> {{ recibo.curso.fecha_inicio }}</p>
+            <p><strong>Fecha de Finalización:</strong> {{ recibo.curso.fecha_finalizacion }}</p>
+            
+            <h3 class="spacing">Datos del Pago</h3>
+            <p><strong>Recibo:</strong> {{ recibo.id }}</p>
+            <p><strong>Nombre Completo:</strong> {{ recibo.usuario.first_name }} {{ recibo.usuario.last_name }}</p>
+            <p><strong>Email:</strong> {{ recibo.usuario.email }}</p>
+            <p><strong>Importe:</strong> {{ recibo.importe }} €</p>
+            <p><strong>Método de Pago:</strong> {{ recibo.metodo_pago }}</p>
+            <p><strong>Fecha de Pago:</strong> {{ recibo.fecha_pago|date:"d/m/Y H:i" }}</p>
+        </div>
+        {% empty %}
+        <p class="sin-recibos">No tienes recibos registrados.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

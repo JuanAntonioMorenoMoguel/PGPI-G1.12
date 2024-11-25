@@ -86,6 +86,7 @@
                                 <button type="button" class="btn-reserva" disabled>No hay plazas para este curso</button>
                             {% endif %}
                         </form>
+                        <a href="{% url 'resumen_compra' curso.id %}" class="btn-reserva">Comprar</a>
                     </td>
                 {% else %}
                 <td>
@@ -121,8 +122,6 @@
         </tbody>
     </table>
 </div>
-
-
 
 <script>
     function toggleDetails(id) {
