@@ -22,6 +22,7 @@
         <div class="navbar-menu">
             <a class="nav-link text-white" href="{% url 'contacto' %}">Contáctanos</a>
             {% if user.is_authenticated %}
+            <a class="nav-link text-white" href="{% url 'mis_recibos' %}">Mis Recibos</a>
             <a class="nav-link text-white" href="{% url 'lista_cursos' %}">Cursos Disponibles</a>
             <a class="nav-link text-white" href="{% url 'perfil' %}">{{ user.email }}</a>
             <a href="{% url 'ver_carrito' %}" class="nav-link text-white">

@@ -1,0 +1,95 @@
+/* Contenedor principal */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.recibos-container {
+    max-width: 500px;
+    width: 100%;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.recibos-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.datos-curso, .datos-pago {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.datos-curso h3, .datos-pago h3 {
+    margin-bottom: 10px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.datos-curso p, .datos-pago p {
+    margin: 5px 0;
+}
+
+.firma {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.firma p {
+    margin: 5px 0;
+}
+/* Título */
+.titulo {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Contenedor scrollable */
+.scrollable-recibos {
+    max-height: 400px; /* Altura máxima antes de habilitar el scroll */
+    overflow-y: auto; /* Scroll vertical */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+/* Estilo de cada recibo */
+.recibo-card {
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 10px;
+    text-align: left;
+}
+
+.recibo-card h3 {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.recibo-card p {
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+/* Mensaje cuando no hay recibos */
+.sin-recibos {
+    font-size: 16px;
+    font-style: italic;
+    color: #666;
+    margin-top: 20px;
+}
+
+

@@ -3,8 +3,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
-from .models import Curso, Carrito
+from .models import Curso, Carrito, Recibo
 from .filters import CursoFilter
+from django.utils.timezone import now
 
 def lista_cursos(request):
     cursos = Curso.objects.all()  # Recuperar todos los cursos
@@ -67,9 +68,27 @@ def resumen_compra(request, curso_id):
 @login_required
 def datos_pago(request, curso_id):
     curso = get_object_or_404(Curso, id=curso_id)
-    return render(request, 'datos_pago.html', {'curso': curso})
+
+    # Crear un recibo en la base de datos
+    recibo = Recibo.objects.create(
+        usuario=request.user,
+        curso=curso,
+        fecha_pago=now(),
+        importe=curso.precio
+    )
+
+        # Redirigir al recibo generado
+    return redirect('recibo', recibo_id=recibo.id)
+
+
 
 @login_required
-def recibo(request, curso_id):
-    curso = get_object_or_404(Curso, id=curso_id)
-    return render(request, 'recibo.html', {'curso': curso})
+def recibo(request, recibo_id):
+    recibo_obj = get_object_or_404(Recibo, id=recibo_id)
+    return render(request, 'recibo.html', {'recibo': recibo_obj})
+
+@login_required
+def mis_recibos(request):
+    # Recuperar los recibos del usuario autenticado
+    recibos = Recibo.objects.filter(usuario=request.user).order_by('-fecha_pago')  # Orden por fecha descendente
+    return render(request, 'mis_recibos.html', {'recibos': recibos})

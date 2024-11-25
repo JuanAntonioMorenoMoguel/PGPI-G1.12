@@ -11,7 +11,7 @@
     <div class="form-container mt-5">
         <h2>Resumen de pago</h2>
         
-        <form method="post" action="{% url 'datos_pago' curso.id %}" onsubmit="return validarFormulario(event)" data-redirect-url="{% url 'recibo' curso.id %}">
+        <form method="post" action="{% url 'datos_pago' curso.id %}" onsubmit="return validarFormulario(event)" data-redirect-url="{% url 'datos_pago' curso.id %}">
             {% csrf_token %}
             <div class="form-group">
                 <label for="card_name">Nombre en la tarjeta</label>
