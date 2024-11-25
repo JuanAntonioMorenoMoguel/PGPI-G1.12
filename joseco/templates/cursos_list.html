@@ -36,11 +36,29 @@
                 <td>{{ curso.vacantes }}</td>
                 <td>{{ curso.precio }} €</td>
                 <td>
-                    <a href="{% url 'editar_curso' curso.id %}" class="btn btn-azul">Editar</a>
-                    <form method="post" action="{% url 'eliminar_curso' curso.id %}" class="btn-eliminar-form" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este curso?');" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-rojo">Eliminar</button>
-                    </form>
+                    {% if user.is_superuser %}
+                        <a href="{% url 'editar_curso' curso.id %}" class="btn btn-azul">Editar</a>
+                        <form method="post" action="{% url 'eliminar_curso' curso.id %}" class="btn-eliminar-form" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este curso?');" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-rojo">Eliminar</button>
+                        </form>
+                    {% endif %}
+                    <button class="btn-detalles" onclick="toggleDetails('detalles-{{ curso.id }}')">Ver Detalles</button>
+                </td>
+            </tr>
+            <tr id="detalles-{{ curso.id }}" class="fila-detalles hidden">
+                <td colspan="9">
+                    <div class="detalle-curso">
+                        <p><strong>Precio:</strong> {{ curso.precio }} €</p>
+                        <p><strong>Horarios:</strong></p>
+                        <ul class="detalle-horarios">
+                            {% for horario in curso.horarios.all %}
+                            <li>{{ horario.dia }} de {{ horario.hora_inicio }} a {{ horario.hora_fin }}</li>
+                            {% empty %}
+                            <li>No hay horarios disponibles para este curso.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </td>
             </tr>
             {% empty %}
@@ -50,9 +68,25 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <div style="margin-top: 20px; text-align: center;">
-        <a href="{% url 'crear_curso' %}" class="btn btn-verde">+ Crear Curso</a>
-    </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleDetails(id) {
+    console.log("Toggle details for: " + id);  // Mensaje de depuración
+    var element = document.getElementById(id);
+    if (element) {
+        if (element.classList.contains('hidden')) {
+            element.classList.remove('hidden');
+            console.log("Showing details for: " + id);  // Mensaje de depuración
+        } else {
+            element.classList.add('hidden');
+            console.log("Hiding details for: " + id);  // Mensaje de depuración
+        }
+    } else {
+        console.log("Element not found: " + id);  // Mensaje de depuración
+    }
+}
+</script>
+{% endblock %} 

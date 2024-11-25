@@ -76,7 +76,7 @@ def eliminar_usuario(request, pk):
 # Vista para listar cursos
 class CursoListView(ListView):
     model = Curso
-    template_name = 'cursos_list.html'
+    template_name = 'cursos.html'
     context_object_name = 'cursos'
 
 # Vista para crear un curso

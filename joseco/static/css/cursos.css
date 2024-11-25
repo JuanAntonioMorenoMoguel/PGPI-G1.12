@@ -1,4 +1,12 @@
-/* Contenedor de la tabla */
+/* Título centrado */
+.titulo {
+    margin-top: 80px;
+    text-align: center;
+    margin-bottom: 100px;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
 .table-container {
     margin: 30px auto;
     max-width: 90%;
@@ -8,126 +16,276 @@
     padding: 20px;
 }
 
-/* Título */
-h2.titulo {
-    text-align: center;
-    font-size: 24px;
-    color: #333;
-    margin-bottom: 20px;
-    font-weight: bold;
+/* Contenedor con scroll */
+.tabla-scrollable {
+    max-height: calc(100vh - 180px);
+    /* Espacio dinámico: ocupa lo máximo posible */
+    overflow-y: auto;
+    margin: 0 auto;
+    width: 95%;
 }
 
-/* Estilo general de la tabla */
+/* Estilos generales de la tabla */
 .custom-table {
     width: 100%;
     border-collapse: collapse;
-    text-align: center;
-    background-color: #ffffff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.custom-table thead tr {
-    background-color: #4CAF50; /* Verde para encabezados */
-    color: white;
-    font-weight: bold;
+    font-size: 16px;
+    background-color: white;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .custom-table th,
 .custom-table td {
-    padding: 12px 15px;
     border: 1px solid #ddd;
+    padding: 12px 15px;
+    text-align: center;
+}
+
+.custom-table th {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+}
+
+.custom-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.custom-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Botón de detalles */
+.btn-detalles {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.btn-detalles:hover {
+    background-color: #0056b3;
+}
+
+/* Botón de detalles */
+.btn-reserva {
+    background-color: #00ff40;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.btn-reserva:hover {
+    background-color: #009a26;
+}
+
+.btn-confirmar {
+    background-color: #4CAF50;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+
+/* Fila de detalles oculta por defecto */
+.fila-detalles {
+    display: table-row;
+    /* Muestra como fila cuando no está oculta */
+    background-color: #f4f4f4;
+}
+
+.fila-detalles.hidden {
+    display: none;
+    /* Oculta completamente la fila */
+}
+
+/* Mensaje para cuando no hay cursos */
+.no-cursos {
+    text-align: center;
+    font-size: 18px;
+    color: #555;
+    font-style: italic;
+}
+
+.detalle-curso {
+    text-align: left;
+    padding-left: 20px;
+    /* Margen izquierdo para mejor visibilidad */
     font-size: 14px;
 }
 
-.custom-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9; /* Fondo gris claro para filas pares */
+.detalle-curso p {
+    margin: 5px 0;
 }
 
-.custom-table tbody tr:hover {
-    background-color: #f1f1f1; /* Efecto hover */
+.form-filters {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    /* Centra todo el formulario horizontalmente */
+    text-align: left;
+    /* Asegura que las etiquetas e inputs estén alineados a la izquierda */
 }
 
-/* Botones en las tablas */
-.btn {
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.filter-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    /* Espacio entre el label y el input */
+    text-align: left;
+    /* Asegura que las etiquetas se alineen a la izquierda */
+}
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+    /* Asegura que el input ocupa el espacio adecuado */
+}
+
+input[type="text"],
+input[type="date"],
+select {
+    width: 200px;
+    /* Ajusta el ancho según lo que necesites */
+    padding: 10px;
+    padding-right: 35px;
+    /* Deja espacio para la papelera */
+    font-size: 14px;
+    text-align: left;
+    /* Centra el texto dentro del input a la izquierda */
+}
+
+.clear-input {
+    position: absolute;
+    right: 10px;
+    /* Ubica la papelera dentro del input */
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 16px;
+    color: #888;
+}
+
+.clear-input:hover {
+    color: #333;
+    /* Cambia el color al pasar el cursor */
+}
+
+/* Grupo de botones */
+/* Contenedor para centrar el grupo de botones */
+/* Contenedor para centrar y alinear los botones */
+/* Contenedor para centrar el grupo de botones */
+.button-group {
+    display: flex;
+    gap: 10px;
+    /* Espacio entre los botones */
+    justify-content: center;
+    /* Centra los botones horizontalmente */
+    align-items: center;
+    /* Asegura que estén alineados verticalmente */
+    margin-top: 10px;
+    /* Espacio superior para separar los botones del resto del formulario */
+}
+
+/* Botón de Filtrar */
+.btn-filtrar,
+.btn-reset {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
     display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+/* Estilo de Filtrar */
+.btn-filtrar {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-filtrar:hover {
+    background-color: #45a049;
+}
+
+/* Estilo de Resetear */
+.btn-reset {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-reset:hover {
+    background-color: #d32f2f;
+}
+
+/* Botones */
+.btn {
     padding: 8px 12px;
     font-size: 12px;
-    text-align: center;
-    border-radius: 5px;
-    text-decoration: none;
-    color: white;
     font-weight: bold;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: inline-block;
 }
 
 .btn:hover {
-    transform: scale(1.05); /* Efecto ligero de zoom al pasar el cursor */
+    opacity: 0.9;
 }
 
 /* Botones específicos */
 .btn-azul {
-    background-color: #007bff; /* Azul */
-    border: none;
+    background-color: #007bff;
 }
 
 .btn-azul:hover {
-    background-color: #0056b3; /* Azul más oscuro */
+    background-color: #0056b3;
 }
 
 .btn-rojo {
-    background-color: #dc3545; /* Rojo */
-    border: none;
+    background-color: #dc3545;
 }
 
 .btn-rojo:hover {
-    background-color: #b52a36; /* Rojo más oscuro */
+    background-color: #b52a36;
 }
 
 .btn-verde {
-    background-color: #28a745; /* Verde */
-    border: none;
+    background-color: #28a745;
 }
 
 .btn-verde:hover {
-    background-color: #218838; /* Verde más oscuro */
-}
-
-/* Enlace "Crear" en verde */
-a.btn-verde {
-    display: inline-block;
-    margin-top: 15px;
-    padding: 10px 20px;
-    font-size: 14px;
-    text-decoration: none;
-    text-align: center;
-    background-color: #28a745;
-    color: white;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-a.btn-verde:hover {
     background-color: #218838;
 }
 
-/* Ajustes para tablas responsivas */
-@media (max-width: 768px) {
-    .custom-table th,
-    .custom-table td {
-        font-size: 12px;
-        padding: 8px 10px;
-    }
-
-    .btn {
-        font-size: 11px;
-        padding: 6px 8px;
-    }
-
-    a.btn-verde {
-        font-size: 12px;
-        padding: 8px 15px;
-    }
+/* Enlace para crear */
+a.btn-verde {
+    display: inline-block;
+    margin-top: 15px;
+    text-align: center;
 }

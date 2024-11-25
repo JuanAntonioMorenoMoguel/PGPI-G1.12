@@ -96,3 +96,48 @@ a.btn-verde {
     margin-top: 15px;
     text-align: center;
 }
+
+.detalle-curso {
+    padding: 10px;
+    background-color: #f9f9f9; /* Fondo claro */
+    border: 1px solid #ddd; /* Borde */
+    border-radius: 4px;
+    text-align: left; /* Alinear el contenido a la izquierda */
+}
+
+/* Lista de horarios */
+.detalle-horarios {
+    margin: 0;
+    padding-left: 20px; /* Desplazamiento para las listas */
+    list-style: disc; /* Puntos para las listas */
+}
+
+/* Estilo de la fila oculta */
+.hidden {
+    display: none; /* Esconder las filas */
+}
+
+.detalle-curso {
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Botón para ver detalles */
+.btn-detalles {
+    background-color: #007bff; /* Azul */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn-detalles:hover {
+    background-color: #0056b3; /* Azul más oscuro */
+}
