@@ -9,11 +9,12 @@ from django.utils.timezone import now
 
 def lista_cursos(request):
     cursos = Curso.objects.all()  # Recuperar todos los cursos
+    recibos = Recibo.objects.filter(usuario=request.user).values_list('curso__id', flat=True)
     carrito = Carrito.objects.filter(usuario=request.user).values_list('curso', flat=True)
     filtro=CursoFilter(request.GET, queryset=cursos)
     cursos_filtrados=filtro.qs
 
-    return render(request, 'cursos.html', {'cursos': cursos_filtrados, 'filtro':filtro, 'carrito': list(carrito)})
+    return render(request, 'cursos.html', {'cursos': cursos_filtrados, 'filtro':filtro, 'carrito': list(carrito), 'recibos': recibos })
 
 
 
@@ -79,6 +80,10 @@ def datos_pago(request, curso_id):
             metodo_pago="Tarjeta"
         )
 
+        if curso.vacantes >= 1:
+            curso.vacantes -= 1
+            curso.save()
+
         return redirect('recibo', recibo_id=recibo.id)
 
     # Si no es POST, simplemente muestra el formulario de pago
@@ -88,6 +93,10 @@ def datos_pago(request, curso_id):
 def pago_efectivo(request, curso_id):
     curso = get_object_or_404(Curso, id=curso_id)
 
+    if curso.vacantes >= 1:
+            curso.vacantes -= 1
+            curso.save()
+    
     # Crear un recibo en la base de datos
     recibo = Recibo.objects.create(
             usuario=request.user,
