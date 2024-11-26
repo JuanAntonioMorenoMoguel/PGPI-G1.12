@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/resumen_compra.css' %}">
+  <link rel="stylesheet" href="{% static 'css/estilosbase.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="form-container mt-5">
+        <h2>Resumen de compra</h2>
+
+        {% for curso in cursos %}
+        <div class="contact-info mt-5">
+            <p><strong>Nombre del curso:</strong> {{ curso.nombre }}</p>
+            <p><strong>Especialidad:</strong> {{ curso.especialidad }}</p>
+            <p><strong>Modalidad:</strong> {{ curso.modalidad }}</p>
+            <p><strong>Fecha de inicio:</strong> {{ curso.fecha_inicio }}</p>
+            <p><strong>Fecha de finalización:</strong> {{ curso.fecha_finalizacion }}</p>
+            <p><strong>Precio:</strong> {{ curso.precio }} €</p>
+        </div>
+        <hr>
+        {% endfor %}
+        
+        <p><strong>Total a pagar:</strong> {{ total_precio }} €</p>
+    </div>
+    
+    <div class="form-container mt-5">
+        <h2>Información del usuario</h2>
+        <div class="user-info mt-5">  
+            <p><strong>Nombre:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'datos_pagos' %}">
+        {% csrf_token %}
+        {% for curso in cursos %}
+        <input type="hidden" name="cursos_seleccionados" value="{{ curso.id }}">
+        {% endfor %}
+        <button type="submit">Pagar con tarjeta</button>
+    </form>
+    
+    <form method="post" action="{% url 'pagos_efectivo' %}">
+        {% csrf_token %}
+        {% for curso in cursos %}
+        <input type="hidden" name="cursos_seleccionados" value="{{ curso.id }}">
+        {% endfor %}
+        <button type="submit">Pago en efectivo</button>
+    </form>
+</div>
+
+{% endblock content %}

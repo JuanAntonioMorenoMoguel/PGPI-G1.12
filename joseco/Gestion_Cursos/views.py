@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from pyexpat.errors import messages
+from django.shortcuts import get_list_or_404, render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -67,6 +68,26 @@ def resumen_compra(request, curso_id):
     return render(request, 'resumen_compra.html', {'curso': curso})
 
 @login_required
+def resumen_compras(request):
+    if request.method == 'POST':
+        cursos_ids = request.POST.getlist('cursos_seleccionados')
+        if not cursos_ids:
+            messages.error(request, "Debes seleccionar al menos un curso.")
+            return redirect('ver_carrito')
+
+        cursos = Curso.objects.filter(id__in=cursos_ids)
+        total_precio = sum(curso.precio for curso in cursos)
+        return render(request, 'resumen_compras.html', {
+            'cursos': cursos,
+            'user': request.user,
+            'total_precio': total_precio
+        })
+    else:
+        return redirect('ver_carrito')
+
+    
+
+@login_required
 def datos_pago(request, curso_id):
     curso = get_object_or_404(Curso, id=curso_id)
 
@@ -114,7 +135,79 @@ def recibo(request, recibo_id):
     return render(request, 'recibo.html', {'recibo': recibo_obj})
 
 @login_required
+def recibos(request):
+    recibos = Recibo.objects.filter(usuario=request.user).order_by('-fecha_pago')
+    return render(request, 'recibos.html', {'recibos': recibos})
+
+@login_required
 def mis_recibos(request):
     # Recuperar los recibos del usuario autenticado
     recibos = Recibo.objects.filter(usuario=request.user).order_by('-fecha_pago')  # Orden por fecha descendente
     return render(request, 'mis_recibos.html', {'recibos': recibos})
+
+@login_required
+def datos_pagos(request):
+    
+    cursos_ids = request.POST.getlist('cursos_seleccionados')
+    cursos = get_list_or_404(Curso, id__in=cursos_ids)
+
+    if request.method == 'POST':
+        
+        recibos = []
+        for curso in cursos:
+            if curso.vacantes >= 1:
+                curso.vacantes -= 1
+                curso.save()
+
+                # Crear un recibo para cada curso
+                recibo = Recibo.objects.create(
+                    usuario=request.user,
+                    curso=curso,
+                    fecha_pago=now(),
+                    importe=curso.precio,
+                    metodo_pago="Tarjeta"
+                )
+                recibos.append(recibo)
+
+        return redirect('mis_recibos')
+        
+    return render(request, 'datos_pagos.html', {'cursos': cursos})
+
+    
+
+@login_required
+def pagos_efectivo(request):
+    if request.method == 'POST':
+        # Obtener los IDs de los cursos seleccionados desde el formulario
+        cursos_ids = request.POST.getlist('cursos_seleccionados')
+        if not cursos_ids:
+            messages.error(request, "No seleccionaste ningún curso.")
+            return redirect('ver_carrito')
+
+        # Obtener los cursos correspondientes
+        cursos = get_list_or_404(Curso, id__in=cursos_ids)
+
+        recibos = []
+        for curso in cursos:
+            if curso.vacantes >= 1:
+                curso.vacantes -= 1
+                curso.save()
+
+                # Crear un recibo para cada curso
+                recibo = Recibo.objects.create(
+                    usuario=request.user,
+                    curso=curso,
+                    fecha_pago=now(),
+                    importe=curso.precio,
+                    metodo_pago="Efectivo"
+                )
+                recibos.append(recibo)
+
+        # Redirigir siempre a la página de 'recibos'
+        return redirect('mis_recibos')
+
+    # Si no es POST, redirigir al carrito
+    return redirect('ver_carrito')
+
+
+
