@@ -169,9 +169,9 @@ def datos_pagos(request):
                 )
                 recibos.append(recibo)
 
-        return redirect('mis_recibos')
+        return render(request, 'datos_pagos.html', {'cursos': cursos})
         
-    return render(request, 'datos_pagos.html', {'cursos': cursos})
+    return redirect('mis_recibos')
 
     
 
