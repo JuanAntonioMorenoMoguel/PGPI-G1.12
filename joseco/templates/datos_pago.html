@@ -1,70 +1,141 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends "base.html" %}
+
+{%load static%}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/resumen_compra.css' %}">
-  <link rel="stylesheet" href="{% static 'css/estilosbase.css' %}">
+<link rel="stylesheet" href="{% static 'css/payment.css' %}">
 {% endblock extra_css %}
 
+
 {% block content %}
-<div class="content-wrapper">
-    <div class="form-container mt-5">
-        <h2>Resumen de pago</h2>
-        
-        <form method="post" action="{% url 'datos_pago' curso.id %}" onsubmit="return validarFormulario(event)" data-redirect-url="{% url 'datos_pago' curso.id %}">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="card_name">Nombre en la tarjeta</label>
-                <input type="text" id="card_name" name="card_name" class="form-control" required pattern="[A-Za-z\s'-]+" title="El nombre debe contener solo letras, espacios, apóstrofes o guiones y no debe contener números">
-            </div>
-            <div class="form-group">
-                <label for="card_number">Número de tarjeta</label>
-                <input type="text" id="card_number" name="card_number" class="form-control" required pattern="\d{16}" title="El número de tarjeta debe contener 16 dígitos">
-            </div>
-            <div class="form-group">
-                <label for="expiry_date">Fecha de expiración (MM/AA)</label>
-                <input type="text" id="expiry_date" name="expiry_date" class="form-control" required pattern="(0[1-9]|1[0-2])\/\d{2}" title="La fecha de expiración debe estar en el formato MM/AA">
-            </div>
-            <div class="form-group">
-                <label for="cvv">CVV</label>
-                <input type="text" id="cvv" name="cvv" class="form-control" required pattern="\d{3,4}" title="El CVV debe contener 3 o 4 dígitos">
-            </div>
-            <button type="submit" class="button-primary">Finalizar compra</button>
+<div class="payment-container">
+    <div class="payment-card">
+        <h2>Pagar curso: {{ curso.nombre }}</h2>
+        <p>Precio: <strong>{{ curso.precio }} €</strong></p>
+
+        <!-- Formulario de datos de usuario y tarjeta -->
+        <form id="payment-form">
+            <!-- Nombre y apellidos -->
+            <input type="text" id="nombre" placeholder="Nombre" class="form-control mb-2" required>
+            <input type="text" id="apellidos" placeholder="Apellidos" class="form-control mb-2" required>
+
+            <!-- Stripe Elements para tarjeta -->
+            <div id="card-element" class="form-control mb-3"></div>
+            
+            <!-- Botón de pago -->
+            <button type="submit" id="submit" class="submit-button">Pagar</button>
         </form>
 
+        <!-- Mensaje de error/success -->
+        <div id="payment-message" class="hidden"></div>
+    </div>
 </div>
 
+<!-- Script de Stripe -->
+
+<script src="https://js.stripe.com/v3/"></script>
 <script>
-    function validarFormulario(event) {
-        // Validar la fecha de expiración
-        const expiryDate = document.getElementById('expiry_date').value;
-        const [month, year] = expiryDate.split('/').map(Number);
-        const now = new Date();
-        const currentMonth = now.getMonth() + 1; // Mes actual (1-12)
-        const currentYear = now.getFullYear() % 100; // Últimos dos dígitos del año
-    
-        if (year < currentYear || (year === currentYear && month < currentMonth)) {
-            alert('La fecha de expiración debe ser posterior a la fecha actual.');
-            event.preventDefault(); // Evita el envío
-            return false;
+
+
+    // Función para obtener el token CSRF de las cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
         }
-    
-        // Validar el nombre en la tarjeta
-        const cardName = document.getElementById('card_name').value.trim();
-        const namePattern = /^[A-Za-z\s'-]+$/;
-    
-        if (!namePattern.test(cardName)) {
-            alert('El nombre debe contener solo letras, espacios, apóstrofes o guiones. No debe contener números.');
-            event.preventDefault(); // Evita el envío
-            return false;
-        }
-    
-        // Si todo es válido, el formulario se envía normalmente
-        return true;
+        return cookieValue;
     }
-    
+
+    const csrftoken = getCookie('csrftoken'); // Obtener el token CSRF
+
+    // Inicializar Stripe
+    const stripe = Stripe('{{ stripe_public_key }}');
+    const elements = stripe.elements();
+
+    // Crear el campo de tarjeta
+    const cardElement = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '16px',
+                color: '#32325d',
+            },
+        },
+        hidePostalCode: true // Ocultar el código postal
+    });
+
+    cardElement.mount('#card-element'); // Montar el campo de tarjeta
+
+    // Manejo del formulario
+    const form = document.getElementById('payment-form');
+    const messageDiv = document.getElementById('payment-message');
+    form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    // Obtener los datos del formulario
+    const nombre = document.getElementById('nombre').value;
+    const apellidos = document.getElementById('apellidos').value;
+    const cursoId = {{ curso.id }} ; // ID del curso desde el backend
+    const cursoName = '{{ curso.nombre }}'; // Nombre del curso desde el backend
+    const precioCurso = parseFloat("{{ curso.precio|floatformat:2 }}");
+
+    try {
+        console.log("Formulario enviado");
+
+        // Enviar la solicitud al backend
+        const response = await fetch('/create-payment-intent/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                amount: precioCurso * 100, // Convertir el precio a céntimos
+                nombre: nombre,
+                apellidos: apellidos,
+                curso_id: cursoId // Enviar el ID del curso
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Error en la solicitud');
+        }
+
+        console.log("Respuesta del servidor:", data);
+
+        // Confirmar el pago con Stripe
+        const { error } = await stripe.confirmCardPayment(data.clientSecret, {
+            payment_method: {
+                card: cardElement
+            }
+        });
+
+        if (error) {
+            messageDiv.classList.remove('hidden');
+            messageDiv.innerText = error.message;
+            messageDiv.style.color = 'red';
+        } else {
+            messageDiv.classList.remove('hidden');
+            messageDiv.innerText = 'Pago completado con éxito.';
+            messageDiv.style.color = 'green';
+
+            // Redirigir al recibo
+            window.location.href = `/mis_recibos/`;
+        }
+    } catch (err) {
+        console.error('Error en la solicitud:', err);
+        messageDiv.classList.remove('hidden');
+        messageDiv.innerText = err.message || 'Ocurrió un error';
+        messageDiv.style.color = 'red';
+    }
+});
 </script>
-
-
-
-{% endblock content %}
+{% endblock %}
