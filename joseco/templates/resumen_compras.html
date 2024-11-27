@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    <form method="post" action="{% url 'datos_pagos' %}">
+    <form method="get" action="{% url 'datos_pagos' %}">
         {% csrf_token %}
         {% for curso in cursos %}
         <input type="hidden" name="cursos_seleccionados" value="{{ curso.id }}">

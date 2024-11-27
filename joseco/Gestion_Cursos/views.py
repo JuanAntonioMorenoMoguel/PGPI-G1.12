@@ -147,14 +147,20 @@ def mis_recibos(request):
 
 @login_required
 def datos_pagos(request):
-    
-    cursos_ids = request.POST.getlist('cursos_seleccionados')
-    cursos = get_list_or_404(Curso, id__in=cursos_ids)
+        
+    if request.method == 'GET':
+        cursos_ids = request.GET.getlist('cursos_seleccionados')
+        cursos = get_list_or_404(Curso, id__in=cursos_ids)
+        print(cursos)
+        return render(request, 'datos_pagos.html', {'cursos': cursos})
 
     if request.method == 'POST':
         
+        cursos = get_list_or_404(Curso, id__in=request.POST.getlist('cursos'))
         recibos = []
+        print(cursos)
         for curso in cursos:
+            print(curso)
             if curso.vacantes >= 1:
                 curso.vacantes -= 1
                 curso.save()
@@ -169,9 +175,9 @@ def datos_pagos(request):
                 )
                 recibos.append(recibo)
 
-        return render(request, 'datos_pagos.html', {'cursos': cursos})
+        return redirect('mis_recibos')
         
-    return redirect('mis_recibos')
+    return render(request, 'datos_pagos.html', {'cursos': cursos})
 
     
 
@@ -201,6 +207,7 @@ def pagos_efectivo(request):
                     importe=curso.precio,
                     metodo_pago="Efectivo"
                 )
+                Carrito.objects.filter(usuario=request.user, curso=curso).delete()
                 recibos.append(recibo)
 
         # Redirigir siempre a la página de 'recibos'
