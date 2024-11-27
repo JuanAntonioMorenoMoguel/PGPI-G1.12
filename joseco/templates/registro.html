@@ -59,7 +59,10 @@
             {{ form.password2 }}
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Registrar</button>
+        <button type="submit" class="btn btn-primary w-100">Registrar</button><br>
+        <!--Boton para ir a inicio de sesion si tiene cuenta-->
+        <p>¿Ya tienes cuenta? Inicia sesión.</p>
+        <a href="{% url 'inicio_sesion' %}" class="btn btn-secondary w-100 mt-3">Iniciar Sesión</a>
     </form>
 </div>
 {% endblock content %}

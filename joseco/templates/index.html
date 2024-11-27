@@ -10,35 +10,34 @@
     <div class="principal">
         <div class="principal-overlay"></div>
         <div class="principal-content">
-            <h1>Oposiciones 2025: Abierto plazo de MATRÍCULA</h1>
-            <p>Desde JoseCo nos aseguramos de que cualquiera pueda estudiar para las oposiciones desde la comodidad de
-                su
-                sillón.</p>
             {% if user.is_authenticated %}
-            <p>Bienvenido, {{ user.first_name }}!</p>
+                {% if user.is_superuser %}
+                        <!-- Encabezado -->
+                        <h1 class="admin-header">Panel de Administración</h1>
+                        <p class="user-welcome">Bienvenido, {{ request.user.username }}</p>
+                        <!-- Botones -->
+                        <div class="admin-buttons">
+                            <a class="button-primary" href="{% url 'admin_usuarios' %}">Usuarios</a>
+                            <a class="button-primary" href="{% url 'admin_cursos' %}">Cursos</a>
+                            <a class="button-primary" href="{% url 'admin_horarios' %}">Horarios</a>
+                        </div>
+                {% else %}
+                    <h1>Oposiciones 2025: Abierto plazo de MATRÍCULA</h1>
+                    <p class="user-welcome">Bienvenido, {{ request.user.username }}</p>
+                    <a class="button-primary" href="{% url 'lista_cursos' %}">Cursos</a>
+                {% endif %}
+            {% else %}
             {% endif %}
-            
-            {% if not user.is_authenticated %}
-            <a class="button-primary" href="{% url 'registro' %}">Registro</a>
-            <a class="button-primary" href="{% url 'inicio_sesion' %}">Iniciar Sesión</a>
-            {% endif %}
-            {% if user.is_authenticated and not user.is_superuser %}
-            <a class="button-primary" href="{% url 'lista_cursos' %}">Cursos</a>
-            {% endif %}
-            {% if user.is_superuser %}
-            <a class="button-primary" href="{% url 'admin_dashboard' %}">Panel de Administración</a>
-            {% endif %}
-
         </div>
     </div>
 
     <!-- Sección de información adicional -->
-    <div class="info-section">
+    <footer class="info-section fixed-footer">
         <h2>CURSOS ONLINE DESDE CUALQUIER PARTE</h2>
         <p>
             En septiembre de 2025 comenzamos nuestro curso de preparación. No te quedes sin tu plaza (limitadas).
             Grupos reducidos.
         </p>
-    </div>
+    </footer>
     
 {% endblock content %}
