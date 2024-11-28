@@ -1,0 +1,61 @@
+    .admin-buttons .button-primary {
+    display: inline-block;
+    margin: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.admin-buttons .button-primary:hover {
+    background-color: #0056b3;
+}
+
+.table_container {
+    padding: 2rem;
+}
+
+.titulo {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.tabla-scrollable {
+    overflow-x: auto;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.custom-table th, .custom-table td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.custom-table th {
+    background-color: #f2f2f2;
+}
+
+.btn-azul {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.btn-azul:hover {
+    background-color: #0056b3;
+}
+
+.info-section {
+    background-color: #333;
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
