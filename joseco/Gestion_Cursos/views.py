@@ -1,11 +1,10 @@
-import datetime
 import json
 from django.contrib import messages
+from mailersend import emails
 from django.shortcuts import get_list_or_404, render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_http_methods
 from .models import Curso, Carrito, Recibo
 from .filters import CursoFilter
 from django.utils.timezone import now
@@ -74,9 +73,6 @@ def resumen_compra(request, curso_id):
     curso = get_object_or_404(Curso, id=curso_id)
     return render(request, 'resumen_compra.html', {'curso': curso})
 
-    
-
-
 def datos_pago(request, curso_id):
     curso = get_object_or_404(Curso, id=curso_id)  # Busca el curso por su ID
     context = {
@@ -89,20 +85,68 @@ def create_payment_intent(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         amount = data.get('amount', 0)
+        
         try:
+            curso = get_object_or_404(Curso, id=data.get('curso_id'));
             intent = stripe.PaymentIntent.create(
                 amount=amount,
                 currency='eur',
                 payment_method_types=['card']
             )
+
+            
             # Crear el recibo asociado
             recibo = Recibo.objects.create(
-                curso=get_object_or_404(Curso, id=data.get('curso_id')),  # Relacionar el curso
+                curso=curso,  # Relacionar el curso
                 usuario=request.user,  # Relacionar el usuario autenticado
                 fecha_pago=now(),  # Registrar la fecha actual como fecha de pago
                 importe=amount / 100,  # Convertir el importe a euros
                 metodo_pago='Con Tarjeta'  # Definir el método de pago
             )
+
+            # Configurar MailerSend
+            api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+            mailer = emails.NewEmail(api_key)
+
+            # Crear el cuerpo del correo
+            mail_body = {}
+
+            mail_from = {
+                "name": "MS_dPjZxa",
+                "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+            }
+
+            recipients = [
+                {
+                    "name": request.user.username,
+                    "email": request.user.email,
+                }
+            ]
+
+            subject = "Confirmación de compra de cursos"
+            text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
+            html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
+
+            
+            html += f"<h2>{curso.nombre}</h2>"
+            html += f"<p>Precio: {curso.precio} €</p>"
+            html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
+            html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
+            html += f"<p>Modalidad: {curso.modalidad}</p>"
+            html += f"<p>Especialidad: {curso.especialidad}</p>"
+            html += "<br>"
+            html += f"<p>Precio Total: {curso.precio} €</p><br>"
+            html += "<p>Gracias por tu compra.</p>"
+
+            mailer.set_mail_from(mail_from, mail_body)
+            mailer.set_mail_to(recipients, mail_body)
+            mailer.set_subject(subject, mail_body)
+            mailer.set_html_content(html, mail_body)
+            mailer.set_plaintext_content(text, mail_body)
+
+            # Enviar el correo electrónico
+            mailer.send(mail_body)
+
             return JsonResponse({'clientSecret': intent['client_secret'], 'recibo_id': recibo.id})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
@@ -173,25 +217,65 @@ def create_payment_intents_cursos(request):
                     currency='eur',
                     payment_method_types=['card']
                 )
-
-                # Crear el recibo asociado
                 recibo = Recibo.objects.create(
-                    curso=curso,
                     usuario=request.user,
+                    curso=curso,
                     fecha_pago=now(),
                     importe=curso.precio,
-                    metodo_pago='Con Tarjeta'
+                    metodo_pago="Con Tarjeta"
                 )
-
 
                 # Eliminar del carrito
                 Carrito.objects.filter(usuario=request.user, curso=curso).delete()
-                
 
                 recibos.append({
                     'recibo_id': recibo.id,
                     'client_secret': intent['client_secret'],  # Stripe client_secret para cada curso
                 })
+
+            # Configurar MailerSend
+            api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+            mailer = emails.NewEmail(api_key)
+
+            # Crear el cuerpo del correo
+            mail_body = {}
+
+            mail_from = {
+                "name": "MS_dPjZxa",
+                "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+            }
+
+            recipients = [
+                {
+                    "name": request.user.username,
+                    "email": request.user.email,
+                }
+            ]
+
+            subject = "Confirmación de compra de cursos"
+            text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
+            html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
+
+            for curso in cursos:
+                html += f"<h2>{curso.nombre}</h2>"
+                html += f"<p>Precio: {curso.precio} €</p>"
+                html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
+                html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
+                html += f"<p>Modalidad: {curso.modalidad}</p>"
+                html += f"<p>Especialidad: {curso.especialidad}</p>"
+                html += "<br>"
+            html += f"<p>Precio Total: {sum(curso.precio for curso in cursos)} €</p><br>"
+            html += "<p>Gracias por tu compra.</p>"
+
+            mailer.set_mail_from(mail_from, mail_body)
+            mailer.set_mail_to(recipients, mail_body)
+            mailer.set_subject(subject, mail_body)
+            mailer.set_html_content(html, mail_body)
+            mailer.set_plaintext_content(text, mail_body)
+
+            # Enviar el correo electrónico
+            mailer.send(mail_body)
+            
 
             return JsonResponse({'recibos': recibos})
 
@@ -218,6 +302,48 @@ def pago_efectivo(request, curso_id):
             importe=curso.precio,
             metodo_pago="Efectivo"
         )
+    
+    api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+    mailer = emails.NewEmail(api_key)
+
+    # Crear el cuerpo del correo
+    mail_body = {}
+
+    mail_from = {
+        "name": "MS_dPjZxa",
+        "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+    }
+
+    recipients = [
+        {
+            "name": request.user.username,
+            "email": request.user.email,
+        }
+    ]
+
+    subject = "Confirmación de compra de cursos"
+    text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
+    html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
+
+    
+    html += f"<h2>{curso.nombre}</h2>"
+    html += f"<p>Precio: {curso.precio} €</p>"
+    html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
+    html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
+    html += f"<p>Modalidad: {curso.modalidad}</p>"
+    html += f"<p>Especialidad: {curso.especialidad}</p>"
+    html += "<br>"
+    html += f"<p>Precio Total: {curso.precio} €</p><br>"
+    html += "<p>Gracias por tu compra.</p>"
+
+    mailer.set_mail_from(mail_from, mail_body)
+    mailer.set_mail_to(recipients, mail_body)
+    mailer.set_subject(subject, mail_body)
+    mailer.set_html_content(html, mail_body)
+    mailer.set_plaintext_content(text, mail_body)
+
+    # Enviar el correo electrónico
+    mailer.send(mail_body)
 
     return redirect('recibo', recibo_id=recibo.id)
 
@@ -249,6 +375,50 @@ def pagos_efectivo(request):
                 )
                 Carrito.objects.filter(usuario=request.user, curso=curso).delete()
                 recibos.append(recibo)
+
+        
+        # Configurar MailerSend
+        api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+        mailer = emails.NewEmail(api_key)
+
+        # Crear el cuerpo del correo
+        mail_body = {}
+
+        mail_from = {
+            "name": "MS_dPjZxa",
+            "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+        }
+
+        recipients = [
+            {
+                "name": request.user.username,
+                "email": request.user.email,
+            }
+        ]
+
+        subject = "Confirmación de compra de cursos"
+        text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
+        html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
+
+        for curso in cursos:
+            html += f"<h2>{curso.nombre}</h2>"
+            html += f"<p>Precio: {curso.precio} €</p>"
+            html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
+            html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
+            html += f"<p>Modalidad: {curso.modalidad}</p>"
+            html += f"<p>Especialidad: {curso.especialidad}</p>"
+            html += "<br>"
+        html += f"<p>Precio Total: {sum(curso.precio for curso in cursos)} €</p><br>"
+        html += "<p>Gracias por tu compra.</p>"
+
+        mailer.set_mail_from(mail_from, mail_body)
+        mailer.set_mail_to(recipients, mail_body)
+        mailer.set_subject(subject, mail_body)
+        mailer.set_html_content(html, mail_body)
+        mailer.set_plaintext_content(text, mail_body)
+
+        # Enviar el correo electrónico
+        mailer.send(mail_body)
 
         # Redirigir siempre a la página de 'recibos'
         return redirect('mis_recibos')
