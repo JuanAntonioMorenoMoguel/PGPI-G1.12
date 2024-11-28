@@ -1,3 +1,5 @@
+import datetime
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -6,6 +8,10 @@ from django.views.decorators.http import require_http_methods
 from .models import Curso, Carrito, Recibo
 from .filters import CursoFilter
 from django.utils.timezone import now
+from django.conf import settings
+import stripe
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 def lista_cursos(request):
     cursos = Curso.objects.all()  # Recuperar todos los cursos
@@ -66,28 +72,59 @@ def resumen_compra(request, curso_id):
     curso = get_object_or_404(Curso, id=curso_id)
     return render(request, 'resumen_compra.html', {'curso': curso})
 
-@login_required
+# @login_required
+# def datos_pago(request, curso_id):
+#     curso = get_object_or_404(Curso, id=curso_id)
+
+#     if request.method == 'POST':
+#         # Crear un recibo en la base de datos
+#         recibo = Recibo.objects.create(
+#             usuario=request.user,
+#             curso=curso,
+#             fecha_pago=now(),
+#             importe=curso.precio,
+#             metodo_pago="Tarjeta"
+#         )
+
+#         if curso.vacantes >= 1:
+#             curso.vacantes -= 1
+#             curso.save()
+
+#         return redirect('recibo', recibo_id=recibo.id)
+
+#     # Si no es POST, simplemente muestra el formulario de pago
+#     return render(request, 'datos_pago.html', {'curso': curso})
+
+
 def datos_pago(request, curso_id):
-    curso = get_object_or_404(Curso, id=curso_id)
+    curso = get_object_or_404(Curso, id=curso_id)  # Busca el curso por su ID
+    context = {
+        'curso': curso,
+        'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
+    }
+    return render(request, 'datos_pago.html', context)
 
+def create_payment_intent(request):
     if request.method == 'POST':
-        # Crear un recibo en la base de datos
-        recibo = Recibo.objects.create(
-            usuario=request.user,
-            curso=curso,
-            fecha_pago=now(),
-            importe=curso.precio,
-            metodo_pago="Tarjeta"
-        )
-
-        if curso.vacantes >= 1:
-            curso.vacantes -= 1
-            curso.save()
-
-        return redirect('recibo', recibo_id=recibo.id)
-
-    # Si no es POST, simplemente muestra el formulario de pago
-    return render(request, 'datos_pago.html', {'curso': curso})
+        data = json.loads(request.body)
+        amount = data.get('amount', 0)
+        try:
+            intent = stripe.PaymentIntent.create(
+                amount=amount,
+                currency='eur',
+                payment_method_types=['card']
+            )
+            # Crear el recibo asociado
+            recibo = Recibo.objects.create(
+                curso=get_object_or_404(Curso, id=data.get('curso_id')),  # Relacionar el curso
+                usuario=request.user,  # Relacionar el usuario autenticado
+                fecha_pago=now(),  # Registrar la fecha actual como fecha de pago
+                importe=amount / 100,  # Convertir el importe a euros
+                metodo_pago='Con Tarjeta'  # Definir el método de pago
+            )
+            return JsonResponse({'clientSecret': intent['client_secret'], 'recibo_id': recibo.id})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
 
 @login_required
 def pago_efectivo(request, curso_id):
