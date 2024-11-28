@@ -38,6 +38,7 @@
     cursor: pointer;
     font-size: 16px;
     width: 100%;
+    margin-bottom: 10px;
 }
 
 .submit-button:hover {
@@ -52,4 +53,21 @@
 
 .hidden {
     display: none;
+}
+
+.button-primary {
+    display: inline-block;
+    text-decoration: none;
+    color: white;
+    background-color: #4CAF50;
+    padding: 15px 25px;
+    border-radius: 5px;
+    font-size: 16px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease;
+    text-align: center;
+}
+
+.button-primary:hover {
+    background-color: #3852c4;
 }

@@ -4,6 +4,48 @@
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/resumen_compra.css' %}">
   <link rel="stylesheet" href="{% static 'css/estilosbase.css' %}">
+  <style>
+    /* Estilos para el modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 30%;
+      text-align: center;
+      border-radius: 8px;
+    }
+    .modal-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .modal-buttons button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .modal-buttons .confirm {
+      background-color: #28a745;
+      color: white;
+    }
+    .modal-buttons .cancel {
+      background-color: #dc3545;
+      color: white;
+    }
+  </style>
 {% endblock extra_css %}
 
 {% block content %}
@@ -38,7 +80,48 @@
     </div>
 
     <a class="button-primary" href="{% url 'datos_pago' curso.id %}">Pagar con tarjeta</a>
-    <a class="button-primary" href="{% url 'pago_efectivo' curso.id %}">Pago en efectivo</a>
+    <button class="button-primary" id="efectivoButton">Pago en efectivo</button>
+    <a class="button-primary" href="{% url 'lista_cursos' %}" >Cancelar</a>
 </div>
 
+<!-- Modal -->
+<div id="confirmModal" class="modal">
+  <div class="modal-content">
+    <p>¿Está seguro de realizar la compra?</p>
+    <div class="modal-buttons">
+      <button class="confirm" id="confirmEfectivo">Aceptar</button>
+      <button class="cancel" id="cancelModal">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Elementos del DOM
+  const efectivoButton = document.getElementById('efectivoButton');
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmEfectivo = document.getElementById('confirmEfectivo');
+  const cancelModal = document.getElementById('cancelModal');
+
+  // Mostrar el modal
+  efectivoButton.addEventListener('click', () => {
+    confirmModal.style.display = 'block';
+  });
+
+  // Confirmar acción
+  confirmEfectivo.addEventListener('click', () => {
+    window.location.href = "{% url 'pago_efectivo' curso.id %}";
+  });
+
+  // Cancelar acción
+  cancelModal.addEventListener('click', () => {
+    confirmModal.style.display = 'none';
+  });
+
+  // Cerrar modal si se hace clic fuera del contenido
+  window.addEventListener('click', (event) => {
+    if (event.target === confirmModal) {
+      confirmModal.style.display = 'none';
+    }
+  });
+</script>
 {% endblock content %}

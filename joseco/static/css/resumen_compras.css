@@ -111,12 +111,12 @@ button.btn:hover {
 }
 
 .button-primary {
-    display: inline-block;
-    text-decoration: none;
-    color: white;
-    background-color: #4CAF50;
+    width: 100%;
+    max-width: 500px;
     padding: 15px 25px;
     border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
     font-size: 16px;
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
     transition: background-color 0.3s ease;
