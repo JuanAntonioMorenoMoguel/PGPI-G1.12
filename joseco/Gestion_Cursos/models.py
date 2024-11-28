@@ -10,6 +10,7 @@ class Carrito(models.Model):
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField(default=1)  # Por si se permite añadir varias veces
     fecha_agregado = models.DateTimeField(auto_now_add=True)
+    
 
 class Recibo(models.Model):
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name='recibos')

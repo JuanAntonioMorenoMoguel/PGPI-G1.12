@@ -1,4 +1,3 @@
-<!-- templates/ver_carrito.html -->
 {% extends "base.html" %}
 {% load static %}
 
@@ -6,46 +5,39 @@
 <link rel="stylesheet" href="{% static 'css/cursos.css' %}">
 {% endblock extra_css %}
 
-
 {% block content %}
 <h1 class="titulo">Cesta de la Compra</h1>
 
-<table class="custom-table">
-    <thead>
-        <tr>
-            <th>Seleccionar</th>
-            <th>Nombre del Curso</th>
-            <th>Cantidad</th>
-            <th>Precio</th>
-            <th>Eliminar curso</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in carrito %}
-        <tr>
-            <td><input type="checkbox" name="seleccionar" value="{{ item.id }}" onchange="toggleRowSelection(this)"></td>
-            <td>{{ item.curso.nombre }}</td>
-            <td>{{ item.cantidad }}</td>
-            <td>{{ item.curso.precio }} €</td>
-            <td>
-                <a href="{% url 'eliminar_de_carrito' item.curso.id %}" class="btn-reserva">Eliminar</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<form method="post" action="{% url 'resumen_compras' %}">
+    {% csrf_token %}
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>Seleccionar</th>
+                <th>Nombre del Curso</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Eliminar curso</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in carrito %}
+            <tr>
+                <td>
+                    <input type="checkbox" name="cursos_seleccionados" value="{{ item.curso.id }}">
+                </td>
+                <td>{{ item.curso.nombre }}</td>
+                <td>{{ item.cantidad }}</td>
+                <td>{{ item.curso.precio }} €</td>
+                <td>
+                    <a href="{% url 'eliminar_de_carrito' item.curso.id %}" class="btn-reserva">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-<a href="{% url 'confirmar_reserva' %}" class="btn-confirmar">Reservar cursos seleccionados</a>
-
-<script>
-    function toggleRowSelection(checkbox) {
-        const row = checkbox.closest('tr');
-        if (checkbox.checked) {
-            row.classList.add('selected-row');
-        } else {
-            row.classList.remove('selected-row');
-        }
-    }
-</script>
+    <button type="submit" class="btn-confirmar">Reservar cursos seleccionados</button>
+</form>
 
 {% endblock content %}

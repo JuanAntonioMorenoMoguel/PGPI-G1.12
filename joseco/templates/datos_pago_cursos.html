@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/payment.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="payment-card">
+        <h2>Cursos seleccionados</h2>
+
+        <!-- Listado de cursos -->
+        {% for curso in cursos %}
+        <div class="curso-info">
+            <p><strong>Curso:</strong> {{ curso.nombre }}</p>
+            <p><strong>Precio:</strong> {{ curso.precio }} €</p>
+            <hr>
+        </div>
+        {% endfor %}
+
+        <p><strong>Total a pagar:</strong> {{ costo_total }} €</p>
+
+        <!-- Formulario para datos de usuario y tarjeta -->
+        <form id="payment-form">
+            <h3>Datos del Usuario</h3>
+            <input type="text" id="nombre" placeholder="Nombre" class="form-control mb-2" required>
+            <input type="text" id="apellidos" placeholder="Apellidos" class="form-control mb-2" required>
+
+            <h3>Datos de la Tarjeta</h3>
+            <div id="card-element" class="form-control mb-3"></div>
+
+            <!-- Botón de pago -->
+            <button type="submit" id="submit" class="submit-button">Pagar</button>
+        </form>
+
+        <!-- Mensaje de error/success -->
+        <div id="payment-message" class="hidden"></div>
+    </div>
+</div>
+
+<!-- Aquí se pasan los datos de los cursos en un JSON -->
+<script id="cursos-data" type="application/json">
+    {{ cursos_json|safe }}
+</script>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    // Función para obtener el token CSRF de las cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const csrftoken = getCookie('csrftoken'); // Token CSRF
+        const stripe = Stripe('{{ stripe_public_key }}'); // Inicializar Stripe
+        const elements = stripe.elements(); // Elementos de Stripe
+        const cardElement = elements.create('card', { // Crear campo de tarjeta
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#32325d',
+                },
+            },
+            hidePostalCode: true // Ocultar el código postal
+        });
+
+        cardElement.mount('#card-element'); // Montar el campo de tarjeta
+
+        const form = document.getElementById('payment-form');
+        const messageDiv = document.getElementById('payment-message');
+
+        // Obtener datos de los cursos desde el JSON embebido
+        const cursosDataElement = document.getElementById('cursos-data');
+        if (!cursosDataElement) {
+            console.error('El elemento con id "cursos-data" no existe en el DOM');
+            return;
+        }
+
+        const cursos = JSON.parse(cursosDataElement.textContent); // Datos de los cursos en JSON
+
+        console.log("Cursos seleccionados:", cursos);
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            // Obtener datos del formulario
+            const nombre = document.getElementById('nombre').value;
+            const apellidos = document.getElementById('apellidos').value;
+            const cursoIds = cursos.map(curso => curso.id); // Obtener los IDs de los cursos seleccionados
+
+            try {
+                console.log("Enviando solicitud para crear PaymentIntents...");
+
+                // Enviar la solicitud al backend
+                const response = await fetch('/create-payment-intents-cursos/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body: JSON.stringify({ curso_ids: cursoIds })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.error || 'Error en la solicitud');
+
+                console.log("Respuesta del servidor:", data);
+
+                // Procesar cada PaymentIntent
+                for (const recibo of data.recibos) {
+                    const { error } = await stripe.confirmCardPayment(recibo.client_secret, {
+                        payment_method: { card: cardElement }
+                    });
+
+                    if (error) throw error;
+                }
+
+                // Redirigir al listado de recibos
+                window.location.href = "/mis_recibos/";
+
+            } catch (err) {
+                console.error('Error en el proceso de pago:', err);
+                messageDiv.classList.remove('hidden');
+                messageDiv.innerText = err.message || 'Ocurrió un error';
+                messageDiv.style.color = 'red';
+            }
+        });
+    });
+</script>
+{% endblock %}
