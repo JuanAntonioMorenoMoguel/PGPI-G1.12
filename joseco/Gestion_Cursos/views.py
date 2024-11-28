@@ -1,6 +1,7 @@
 import datetime
 import json
-from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.shortcuts import get_list_or_404, render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -10,6 +11,7 @@ from .filters import CursoFilter
 from django.utils.timezone import now
 from django.conf import settings
 import stripe
+from django.core.serializers.json import DjangoJSONEncoder
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -57,7 +59,7 @@ def confirmar_reserva(request):
             item.curso.vacantes -= item.cantidad
             item.curso.save()
             item.delete()  # Solo eliminar si la reserva se confirmó correctamente
-    return redirect('lista_cursos')
+    return redirect('resumen_compra_cursos')
 
     
 @login_required
@@ -72,28 +74,7 @@ def resumen_compra(request, curso_id):
     curso = get_object_or_404(Curso, id=curso_id)
     return render(request, 'resumen_compra.html', {'curso': curso})
 
-# @login_required
-# def datos_pago(request, curso_id):
-#     curso = get_object_or_404(Curso, id=curso_id)
-
-#     if request.method == 'POST':
-#         # Crear un recibo en la base de datos
-#         recibo = Recibo.objects.create(
-#             usuario=request.user,
-#             curso=curso,
-#             fecha_pago=now(),
-#             importe=curso.precio,
-#             metodo_pago="Tarjeta"
-#         )
-
-#         if curso.vacantes >= 1:
-#             curso.vacantes -= 1
-#             curso.save()
-
-#         return redirect('recibo', recibo_id=recibo.id)
-
-#     # Si no es POST, simplemente muestra el formulario de pago
-#     return render(request, 'datos_pago.html', {'curso': curso})
+    
 
 
 def datos_pago(request, curso_id):
@@ -127,6 +108,101 @@ def create_payment_intent(request):
             return JsonResponse({'error': str(e)}, status=400)
 
 @login_required
+def resumen_compras(request):
+    if request.method == 'POST':
+        cursos_ids = request.POST.getlist('cursos_seleccionados')
+        if not cursos_ids:
+            messages.error(request, "Debes seleccionar al menos un curso.")
+            return redirect('ver_carrito')
+
+        cursos = Curso.objects.filter(id__in=cursos_ids)
+        total_precio = sum(curso.precio for curso in cursos)
+        return render(request, 'resumen_compras.html', {
+            'cursos': cursos,
+            'user': request.user,
+            'total_precio': total_precio
+        })
+    else:
+        return redirect('ver_carrito')
+    
+@login_required
+def datos_pago_cursos(request):
+    if request.method == 'POST':
+        curso_ids = request.POST.getlist('cursos_seleccionados')
+        cursos = Curso.objects.filter(id__in=curso_ids)
+
+        if not cursos.exists():
+            messages.error(request, "No se encontraron los cursos seleccionados.")
+            return redirect('ver_carrito')
+
+        costo_total = sum(curso.precio for curso in cursos)
+        context = {
+            'cursos': cursos,
+            'costo_total': costo_total,
+            'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
+            'cursos_json': json.dumps(
+                list(cursos.values('id', 'nombre', 'precio')),
+                cls=DjangoJSONEncoder
+            )  # Serializar los cursos para usarlos en JS
+        }
+        return render(request, 'datos_pago_cursos.html', context)
+    return redirect('ver_carrito')
+
+@login_required
+def create_payment_intents_cursos(request):
+    if request.method == 'POST':
+        try:
+            # Decodificar el cuerpo de la solicitud
+            data = json.loads(request.body)
+            curso_ids = data.get('curso_ids', [])
+
+            if not curso_ids:
+                return JsonResponse({'error': "No se seleccionaron cursos para procesar el pago."}, status=400)
+
+            # Obtener los cursos seleccionados
+            cursos = Curso.objects.filter(id__in=curso_ids)
+            if not cursos.exists():
+                return JsonResponse({'error': "No se encontraron los cursos seleccionados."}, status=404)
+
+            # Crear recibos y PaymentIntent para cada curso
+            recibos = []
+            for curso in cursos:
+                amount = int(curso.precio * 100)  # Precio en céntimos para Stripe
+                intent = stripe.PaymentIntent.create(
+                    amount=amount,
+                    currency='eur',
+                    payment_method_types=['card']
+                )
+
+                # Crear el recibo asociado
+                recibo = Recibo.objects.create(
+                    curso=curso,
+                    usuario=request.user,
+                    fecha_pago=now(),
+                    importe=curso.precio,
+                    metodo_pago='Con Tarjeta'
+                )
+
+
+                # Eliminar del carrito
+                Carrito.objects.filter(usuario=request.user, curso=curso).delete()
+                
+
+                recibos.append({
+                    'recibo_id': recibo.id,
+                    'client_secret': intent['client_secret'],  # Stripe client_secret para cada curso
+                })
+
+            return JsonResponse({'recibos': recibos})
+
+        except stripe.error.StripeError as e:
+            return JsonResponse({'error': f"Error de Stripe: {e.user_message}"}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+        
+
+@login_required
 def pago_efectivo(request, curso_id):
     curso = get_object_or_404(Curso, id=curso_id)
 
@@ -144,6 +220,41 @@ def pago_efectivo(request, curso_id):
         )
 
     return redirect('recibo', recibo_id=recibo.id)
+
+@login_required
+def pagos_efectivo(request):
+    if request.method == 'POST':
+        # Obtener los IDs de los cursos seleccionados desde el formulario
+        cursos_ids = request.POST.getlist('cursos_seleccionados')
+        if not cursos_ids:
+            messages.error(request, "No seleccionaste ningún curso.")
+            return redirect('ver_carrito')
+
+        # Obtener los cursos correspondientes
+        cursos = get_list_or_404(Curso, id__in=cursos_ids)
+
+        recibos = []
+        for curso in cursos:
+            if curso.vacantes >= 1:
+                curso.vacantes -= 1
+                curso.save()
+
+                # Crear un recibo para cada curso
+                recibo = Recibo.objects.create(
+                    usuario=request.user,
+                    curso=curso,
+                    fecha_pago=now(),
+                    importe=curso.precio,
+                    metodo_pago="Efectivo"
+                )
+                Carrito.objects.filter(usuario=request.user, curso=curso).delete()
+                recibos.append(recibo)
+
+        # Redirigir siempre a la página de 'recibos'
+        return redirect('mis_recibos')
+
+    # Si no es POST, redirigir al carrito
+    return redirect('ver_carrito')
 
 @login_required
 def recibo(request, recibo_id):
