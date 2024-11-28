@@ -1,11 +1,18 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}
 <title>Inicio - JOSECO</title>
 {% endblock title %}
 
-{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock extra_css %}
 
+{% block content %}
+    <br>
+    <br>
+    <br>
     <!-- Sección principal -->
     <div class="principal">
         <div class="principal-overlay"></div>
@@ -27,9 +34,48 @@
                     <a class="button-primary" href="{% url 'lista_cursos' %}">Cursos</a>
                 {% endif %}
             {% else %}
+                <h1>Oposiciones 2025: Abierto plazo de MATRÍCULA</h1>
             {% endif %}
         </div>
     </div>
+
+    {% if not user.is_authenticated %}
+        <div class="table_container">
+                {% if cursos %}
+                    <h1 class="titulo">Lista de Cursos</h1>
+                    <div class="tabla-scrollable">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre del Curso</th>
+                                    <th>Especialidad</th>
+                                    <th>Modalidad</th>
+                                    <th>Fecha Inicio</th>
+                                    <th>Fecha Finalización</th>
+                                    <th>Vacantes</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for curso in cursos %}
+                                <tr>
+                                    <td>{{ curso.nombre }}</td>
+                                    <td>{{ curso.get_especialidad_display }}</td>
+                                    <td>{{ curso.get_modalidad_display }}</td>
+                                    <td>{{ curso.fecha_inicio }}</td>
+                                    <td>{{ curso.fecha_finalizacion }}</td>
+                                    <td>{{ curso.vacantes }}</td>
+                                    <td>
+                                        <a href="{% url 'registro' %}" class="btn btn-azul">Apuntate!</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+        </div>
+    {% endif %}
 
     <!-- Sección de información adicional -->
     <footer class="info-section fixed-footer">
