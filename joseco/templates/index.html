@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-<title>Inicio - JOSECO</title>
+<title>Inicio - OPOSCHEDULE</title>
 {% endblock title %}
 
 {% block extra_css %}
@@ -25,7 +25,7 @@
                         <!-- Botones -->
                         <div class="admin-buttons">
                             <a class="button-primary" href="{% url 'admin_usuarios' %}">Usuarios</a>
-                            <a class="button-primary" href="{% url 'admin_cursos' %}">Cursos</a>
+                            <a class="button-primary" href="{% url 'lista_cursos' %}">Cursos</a>
                             <a class="button-primary" href="{% url 'admin_horarios' %}">Horarios</a>
                         </div>
                 {% else %}
@@ -42,7 +42,8 @@
     {% if not user.is_authenticated or user.is_authenticated and not user.is_superuser %}
         <div class="table_container">
                 {% if cursos %}
-                    <h1 class="titulo">Lista de Cursos</h1>
+                    <h2 class="table-title" style="text-align: center; margin-bottom: 20px;">Alguno de nuestros cursos</h2>
+                    
                     <div class="tabla-scrollable">
                         <table class="custom-table">
                             <thead>
@@ -53,7 +54,9 @@
                                     <th>Fecha Inicio</th>
                                     <th>Fecha Finalización</th>
                                     <th>Vacantes</th>
+                                    {% if not user.is_authenticated %}
                                     <th>Acciones</th>
+                                    {% endif %}
                                 </tr>
                             </thead>
                             <tbody>
@@ -65,13 +68,21 @@
                                     <td>{{ curso.fecha_inicio }}</td>
                                     <td>{{ curso.fecha_finalizacion }}</td>
                                     <td>{{ curso.vacantes }}</td>
+                                    {% if not user.is_authenticated %}
                                     <td>
                                         <a href="{% url 'registro' %}" class="btn btn-azul">Apuntate!</a>
                                     </td>
+                                    {% endif %}
                                 </tr>
                                 {% endfor %}
+                                
                             </tbody>
                         </table>
+                        {% if user.is_authenticated %}
+                        <div style="text-align: center;">
+                            <a href="{% url 'lista_cursos' %}" class="btn btn-azul" style="margin-top: 20px;">Saber más!</a>
+                        </div>
+                        {% endif %}
                     </div>
                 {% endif %}
         </div>

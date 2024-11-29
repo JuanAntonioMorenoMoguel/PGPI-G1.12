@@ -8,43 +8,7 @@
 
 
 {% block content %}
-<h1 class="titulo">Lista de Cursos</h1>
-
-<!-- Formulario de filtrado -->
-<form method="get" class="form-filters">
-    <div class="filter-group">
-        <label for="id_nombre">Nombre del Curso:</label>
-        <div class="input-wrapper">
-            {{ filtro.form.nombre }}
-            <span class="clear-input" onclick="clearField('id_nombre')">🗑️</span>
-        </div>
-    </div>
-
-    <div class="filter-group">
-        <label for="id_especialidad">Especialidad:</label>
-        {{ filtro.form.especialidad }}
-    </div>
-
-    <div class="filter-group">
-        <label for="id_modalidad">Modalidad:</label>
-        {{ filtro.form.modalidad }}
-    </div>
-
-    <div class="filter-group">
-        <label for="id_fecha_inicio">Fecha de Inicio:</label>
-        {{ filtro.form.fecha_inicio }}
-    </div>
-
-    <div class="filter-group">
-        <label for="id_fecha_finalizacion">Fecha de Fin:</label>
-        {{ filtro.form.fecha_finalizacion }}
-    </div>
-
-    <div class="button-group">
-        <button type="submit" class="btn-filtrar">Filtrar</button>
-        <a href="{% url 'lista_cursos' %}" class="btn-reset">Resetear</a>
-    </div>
-</form>
+<h1 class="titulo">Mis Cursos</h1>
 
 <div class="tabla-scrollable">
     <table class="custom-table">
@@ -55,9 +19,7 @@
                 <th>Modalidad</th>
                 <th>Fecha Inicio</th>
                 <th>Fecha Finalización</th>
-                <th>Vacantes</th>
                 <th>Detalles</th>
-                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -68,38 +30,9 @@
                 <td>{{ curso.get_modalidad_display }}</td>
                 <td>{{ curso.fecha_inicio }}</td>
                 <td>{{ curso.fecha_finalizacion }}</td>
-                <td>{{ curso.vacantes }}</td>
                 <td>
                     <button class="btn-detalles" onclick="toggleDetails('detalles-{{ curso.id }}')">Ver Detalles</button>
                 </td>
-                
-
-                {% if not user.is_superuser %}
-                    <td>
-                        <form method="post" action="{% url 'agregar_a_carrito' curso.id %}" class="form-reserva" data-curso-id="{{ curso.id }}">
-                            {% csrf_token %}
-                            {% if curso.vacantes > 0 and curso.id not in carrito and curso.id not in recibos %}
-                                <button type="button" class="btn-reserva" onclick="reservarCurso({{ curso.id }})">Añadir al carrito</button>
-                                <a href="{% url 'resumen_compra' curso.id %}" class="btn-reserva">Comprar</a>
-                            {% elif curso.id in carrito %}
-                                <button type="button" class="btn-reserva" disabled>Ya está en el carrito</button>
-                            {% elif curso.id in recibos %}
-                                <button type="button" class="btn-reserva" disabled>Ya has reservado este curso</button>
-                            {% elif curso.vacantes == 0 %}
-                                <button type="button" class="btn-reserva" disabled>No hay plazas para este curso</button>
-                            {% endif %}
-                        </form>
-                        
-                    </td>
-                {% else %}
-                <td>
-                    <a href="{% url 'editar_curso' curso.id %}" class="btn btn-azul">Editar</a>
-                    <form method="post" action="{% url 'eliminar_curso' curso.id %}" class="btn-eliminar-form" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este curso?');" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-rojo">Eliminar</button>
-                    </form>
-                </td>
-                {% endif %}
                 
             </tr>
             <tr id="detalles-{{ curso.id }}" class="fila-detalles hidden">

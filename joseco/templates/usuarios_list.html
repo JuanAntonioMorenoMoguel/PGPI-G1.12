@@ -45,6 +45,7 @@
                         {% csrf_token %}
                         <button type="submit" class="btn btn-rojo">Eliminar</button>
                     </form>
+                    <a href="{% url 'recibos_usuario' usuario.id %}" class="btn btn-azul">Ver Recibos</a>
                 </td>
             </tr>
             {% empty %}

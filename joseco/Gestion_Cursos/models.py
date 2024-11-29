@@ -24,5 +24,5 @@ class Recibo(models.Model):
             ('Pagado', 'Pagado'),
             ('No Pagado', 'No Pagado')
         ],
-        default='No Pagado'
+        default='No Pagado'
     )
