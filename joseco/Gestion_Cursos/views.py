@@ -11,6 +11,7 @@ from django.utils.timezone import now
 from django.conf import settings
 import stripe
 from django.core.serializers.json import DjangoJSONEncoder
+from decimal import Decimal
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -70,8 +71,28 @@ def carrito_cantidad(request):
 
 @login_required
 def resumen_compra(request, curso_id):
+    # Obtener el curso por ID
     curso = get_object_or_404(Curso, id=curso_id)
-    return render(request, 'resumen_compra.html', {'curso': curso})
+
+    # Verificar si el curso cumple las condiciones para excluir gastos de gestión
+    cumple_condiciones = (
+        curso.duracion_meses() >= 1 and  # Mínimo 1 mes
+        4 <= curso.horas_semanales <= 6 and  # Entre 4 y 6 horas semanales
+        (curso.precio / curso.duracion_meses()) >= 75  # Precio mensual mínimo de 75 €
+    )
+
+    # Calcular los gastos de gestión
+    gastos_gestion = Decimal('0.00') if cumple_condiciones else Decimal('10.00')
+
+    # Calcular el precio total
+    total_precio = curso.precio + gastos_gestion
+
+    # Renderizar la plantilla con los datos
+    return render(request, 'resumen_compra.html', {
+        'curso': curso,
+        'gastos_gestion': gastos_gestion,
+        'total_precio': total_precio
+    })
 
 def datos_pago(request, curso_id):
     curso = get_object_or_404(Curso, id=curso_id)  # Busca el curso por su ID
@@ -161,11 +182,32 @@ def resumen_compras(request):
             messages.error(request, "Debes seleccionar al menos un curso.")
             return redirect('ver_carrito')
 
+        # Filtrar los cursos seleccionados
         cursos = Curso.objects.filter(id__in=cursos_ids)
-        total_precio = sum(curso.precio for curso in cursos)
+
+        # Calcular el precio total de los cursos
+        total_precio_cursos = sum(curso.calcular_precio_final() for curso in cursos)
+
+        # Verificar si todos los cursos cumplen las condiciones
+        cumple_condiciones = all(
+            curso.duracion_meses() >= 1 and  # Mínimo 1 mes
+            4 <= curso.horas_semanales <= 6 and  # Entre 4 y 6 horas semanales
+            (curso.precio / curso.duracion_meses()) >= 75  # Mínimo 75€/mes
+            for curso in cursos
+        )
+
+        # Añadir un único gasto de gestión si algún curso no cumple las condiciones
+        gastos_gestion = Decimal('10.00') if not cumple_condiciones else Decimal('0.00')
+
+        # Calcular el total
+        total_precio = total_precio_cursos + gastos_gestion
+
+        # Renderizar la plantilla con los datos
         return render(request, 'resumen_compras.html', {
             'cursos': cursos,
             'user': request.user,
+            'total_precio_cursos': total_precio_cursos,
+            'gastos_gestion': gastos_gestion,
             'total_precio': total_precio
         })
     else:
@@ -303,7 +345,11 @@ def pago_efectivo(request, curso_id):
             usuario=request.user,
             curso=curso,
             fecha_pago=now(),
-            importe=curso.precio,
+            importe=curso.precio + (10 if not (
+            curso.duracion_meses() >= 1 and
+            4 <= curso.horas_semanales <= 6 and
+            (curso.precio / curso.duracion_meses()) >= 75
+            ) else 0),
             metodo_pago="Efectivo",
             estado="No Pagado"
 
@@ -365,6 +411,17 @@ def pagos_efectivo(request):
         # Obtener los cursos correspondientes
         cursos = get_list_or_404(Curso, id__in=cursos_ids)
 
+        n = len(cursos)
+        gastos_gestion_totales = Decimal('10.00') if any(
+        not (
+            curso.duracion_meses() >= 1 and
+            4 <= curso.horas_semanales <= 6 and
+            (curso.precio / curso.duracion_meses()) >= 75
+        ) for curso in cursos
+        ) else Decimal('0.00')
+
+        gastos_gestion_por_curso = gastos_gestion_totales / n if n > 0 else 0
+
         recibos = []
         for curso in cursos:
             if curso.vacantes >= 1:
@@ -376,7 +433,7 @@ def pagos_efectivo(request):
                     usuario=request.user,
                     curso=curso,
                     fecha_pago=now(),
-                    importe=curso.precio,
+                    importe=curso.precio + gastos_gestion_por_curso,
                     metodo_pago="Efectivo",
                     estado="No Pagado"
 

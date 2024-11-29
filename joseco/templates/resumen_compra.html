@@ -50,26 +50,28 @@
 
 {% block content %}
 <div class="content-wrapper">
-    <div class="form-container mt-5">
-        <h2>Resumen de compra</h2>
-        
-        <div class="contact-info mt-5">
-            <p><strong>Nombre del curso:</strong> {{ curso.nombre }}</p>
-            <p><strong>Especialidad:</strong> {{ curso.especialidad }}</p>
-            <p><strong>Modalidad:</strong> {{ curso.modalidad }}</p>
-            <p><strong>Fecha de inicio:</strong> {{ curso.fecha_inicio }}</p>
-            <p><strong>Fecha de finalización:</strong> {{ curso.fecha_finalizacion }}</p>
-            <p><strong>Horarios:</strong></p>
-            <div class="horarios">
-                {% for horario in curso.horarios.all %}
+  <div class="form-container mt-5">
+    <h2>Resumen de compra</h2>
+    
+    <div class="contact-info mt-5">
+        <p><strong>Nombre del curso:</strong> {{ curso.nombre }}</p>
+        <p><strong>Especialidad:</strong> {{ curso.especialidad }}</p>
+        <p><strong>Modalidad:</strong> {{ curso.modalidad }}</p>
+        <p><strong>Fecha de inicio:</strong> {{ curso.fecha_inicio }}</p>
+        <p><strong>Fecha de finalización:</strong> {{ curso.fecha_finalizacion }}</p>
+        <p><strong>Horarios:</strong></p>
+        <div class="horarios">
+            {% for horario in curso.horarios.all %}
                 <p>{{ horario.dia }} de {{ horario.hora_inicio }} a {{ horario.hora_fin }}</p>
-                {% empty %}
+            {% empty %}
                 <p>No hay horarios disponibles para este curso.</p>
-                {% endfor %}
-            </div>
-            <p><strong>Precio:</strong> {{ curso.precio }} €</p>
+            {% endfor %}
         </div>
+        <p><strong>Subtotal del curso:</strong> {{ curso.precio }} €</p>
+        <p><strong>Gastos de gestión del pedido:</strong> {{ gastos_gestion }} €</p>
+        <p><strong>Total a pagar:</strong> {{ total_precio }} €</p>
     </div>
+</div>
     
     <div class="form-container mt-5">
         <h2>Información del usuario</h2>

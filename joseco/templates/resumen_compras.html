@@ -60,11 +60,14 @@
             <p><strong>Modalidad:</strong> {{ curso.modalidad }}</p>
             <p><strong>Fecha de inicio:</strong> {{ curso.fecha_inicio }}</p>
             <p><strong>Fecha de finalización:</strong> {{ curso.fecha_finalizacion }}</p>
-            <p><strong>Precio:</strong> {{ curso.precio }} €</p>
+            <p><strong>Precio:</strong> {{ curso.calcular_precio_final }} €</p>
+            
         </div>
         <hr>
         {% endfor %}
         
+        <p><strong>Subtotal de cursos:</strong> {{ total_precio_cursos }} €</p>
+        <p><strong>Gastos de gestión del pedido:</strong> {{ gastos_gestion }} €</p>
         <p><strong>Total a pagar:</strong> {{ total_precio }} €</p>
     </div>
     
