@@ -6,3 +6,4 @@ tzdata==2024.2
 django-filter==23.2
 stripe
 mailersend
+whitenoise

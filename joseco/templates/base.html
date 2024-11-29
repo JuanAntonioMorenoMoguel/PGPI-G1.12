@@ -49,8 +49,15 @@
                 <a href="{% url 'inicio_sesion' %}" class="btn btn-secondary w-100 mt-3">Acceso</a>
                 <a class="nav-link text-white" href="{% url 'contacto' %}">Contáctanos</a>
             {% endif %}
+            <!-- formulario para buscar recibo por id si no estas logueado o no eres admin-->
+            {% if not user.is_authenticated or not user.is_staff %}
+                <form action="{% url 'ver_recibo' %}" method="get" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="text" name="id_recibo" placeholder="Buscar recibo por ID" class="form-control" style="width: 200px; display: inline;">
+                    <button type="submit" class="btn btn-secondary">Buscar Recibo</button>
+                </form>
+            {% endif %}
         </div>
-        
     </div>
 
     {% block content %}{% endblock content %}

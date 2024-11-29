@@ -508,3 +508,11 @@ def mis_cursos(request):
     cursos = Recibo.objects.filter(usuario=request.user, estado='Pagado').values_list('curso__id', flat=True)
     cursos = Curso.objects.filter(id__in=cursos)
     return render(request, 'mis_cursos.html', {'cursos': cursos})
+
+def ver_recibo(request):
+    recibo_id = request.GET.get('id_recibo')
+    if recibo_id:
+        recibo = get_object_or_404(Recibo, id=recibo_id)
+        return render(request, 'recibo.html', {'recibo': recibo})
+    else:
+        return render(request, 'recibo.html', {'error': 'No se ha proporcionado un ID de recibo válido.'})
