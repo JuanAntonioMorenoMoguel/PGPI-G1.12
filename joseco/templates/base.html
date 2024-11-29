@@ -30,6 +30,7 @@
                     </a>
                 {% endif %}
                 <a class="nav-link text-white" href="{% url 'perfil' %}">{{ user.email }}</a>
+                <a class="nav-link text-white" href="{% url 'contacto' %}">Contáctanos</a>
                 <form action="{% url 'cerrar_sesion' %}" method="post" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="nav-link text-white"
