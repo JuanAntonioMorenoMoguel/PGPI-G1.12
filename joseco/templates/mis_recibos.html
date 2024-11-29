@@ -6,6 +6,11 @@
 {% endblock extra_css %}
 
 {% block content %}
+<form action="{% url 'ver_recibo' %}" method="get" style="display: inline;">
+    {% csrf_token %}
+    <input type="text" name="id_recibo" placeholder="Buscar recibo por ID" class="form-control" style="width: 200px; display: inline;">
+    <button type="submit" class="btn btn-secondary">Buscar Recibo</button>
+</form>
 <div class="recibos-container">
     <h2 class="titulo">Mis Recibos</h2>
 

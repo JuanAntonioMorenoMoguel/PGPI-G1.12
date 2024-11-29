@@ -17,15 +17,6 @@
         </div>
     {% endif %}
 
-    <!-- Mostrar mensajes de Django -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-info" style="margin-bottom: 20px; border-radius: 4px; background-color: #e9ecef; color: #495057; padding: 10px;">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-
     <form method="POST" autocomplete="off">
         {% csrf_token %}
 
