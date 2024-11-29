@@ -26,5 +26,3 @@ class Recibo(models.Model):
         ],
         default='No Pagado'
     )
-
-    
