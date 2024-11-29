@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/table.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<br>
+<br>
+<br>
+<div class="table-container">
+    <h1 class="titulo">Recibos de {{ usuario.first_name }}</h1>
+    
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Importe</th>
+                <th>Método de Pago</th>
+                <th>Fecha de Pago</th>
+                <th>Estado</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recibo in recibos %}
+            <tr>
+                <td>{{ recibo.id }}</td>
+                <td>{{ recibo.importe }} €</td>
+                <td>{{ recibo.metodo_pago }}</td>
+                <td>{{ recibo.fecha_pago|date:"d/m/Y" }}</td>
+                <td>{{ recibo.estado }}</td>
+                <td>
+                    {% if recibo.estado == 'No Pagado' %}
+                    <form method="post" action="{% url 'cambiar_estado' recibo.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-azul">Marcar como Pagado</button>
+                    </form>
+                    {% else %}
+                    <a> No hay acciones disponibles </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="no-recibos">No hay recibos disponibles.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

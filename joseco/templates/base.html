@@ -4,8 +4,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reserva de cursos de oposiciones</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/logo.ico' %}">
+    <title>OPOSCHEDULE</title>
     <link rel="stylesheet" href="{% static 'css/estilosbase.css' %}">
     {% block title %}{% endblock title %} 
     {% block extra_css %}{% endblock extra_css %}
@@ -17,12 +17,19 @@
 
     <!-- Barra de navegación -->
     <div class="navbar fixed-top">
-        <a href="{% url 'index' %}" class="navbar-logo no-underline">JoseCo</a>
+        <!-- Añadir png a la izquierda de OPOSCHEDULE con tamaño reducido -->
+        <div class="d-flex align-items-center">
+            <a href="{% url 'index' %}">
+                <img src="{% static 'images/logo.png' %}" alt="Logo" class="navbar-logo" style="width: 25px; height: 25px; margin-right: 5px;">
+            </a>
+            <a href="{% url 'index' %}" class="navbar-logo no-underline text-white" style="text-decoration: none;">OPOSCHEDULE</a>
+        </div>
         
         <div class="navbar-menu">
             {% if user.is_authenticated %}
                 {% if user.is_staff %}
                 {% else %}
+                    <a class="nav-link text-white" href="{% url 'mis_cursos' %}">Mis Cursos</a>
                     <a class="nav-link text-white" href="{% url 'mis_recibos' %}">Mis Recibos</a>
                     <a class="nav-link text-white" href="{% url 'lista_cursos' %}">Cursos Disponibles</a>
                     <a href="{% url 'ver_carrito' %}" class="nav-link text-white">

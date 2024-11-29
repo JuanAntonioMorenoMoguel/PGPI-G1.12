@@ -29,11 +29,21 @@
         <div class="form-group">
             <label for="id_fecha_inicio">Fecha de Inicio:</label>
             {{ form.fecha_inicio }}
+            {% if form.fecha_inicio.errors %}
+                <div class="text-danger">
+                    {{ form.fecha_inicio.errors|join:", " }}
+                </div>
+            {% endif %}
         </div>
         
         <div class="form-group">
             <label for="id_fecha_finalizacion">Fecha de Finalización:</label>
             {{ form.fecha_finalizacion }}
+            {% if form.fecha_finalizacion.errors %}
+                <div class="text-danger">
+                    {{ form.fecha_finalizacion.errors|join:", " }}
+                </div>
+            {% endif %}
         </div>
         
         <div class="form-group">
@@ -46,10 +56,13 @@
             {{ form.vacantes }}
         </div>
 
-        <div class="button-group">
-            <button type="submit" class="btn">Guardar Cambios</button>
-            <a href="{% url 'admin_cursos' %}" class="btn btn-cancelar">Cancelar</a>
-        </div>
+        <form action="{% url 'lista_cursos' %}" method="post">
+            {% csrf_token %}
+            <div class="button-group">
+                <button type="submit" class="btn">Guardar Cambios</button>
+            </div>
+        </form>
+        <a href="{% url 'lista_cursos' %}" class="btn btn-cancelar">Cancelar</a>
     </form>
 </div>
 {% endblock %}

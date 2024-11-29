@@ -27,6 +27,7 @@
         <p><strong>Importe:</strong> {{ recibo.importe }} €</p>
         <p><strong>Método de Pago:</strong> {{ recibo.metodo_pago }}</p>
         <p><strong>Fecha de Pago:</strong> {{ recibo.fecha_pago|date:"d/m/Y H:i" }}</p>
+        <p><strong>Estado:</strong> {{ recibo.get_estado_display }}</p>
     </div>
 </div>
 {% endblock %}

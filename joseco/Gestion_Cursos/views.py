@@ -101,7 +101,9 @@ def create_payment_intent(request):
                 usuario=request.user,  # Relacionar el usuario autenticado
                 fecha_pago=now(),  # Registrar la fecha actual como fecha de pago
                 importe=amount / 100,  # Convertir el importe a euros
-                metodo_pago='Con Tarjeta'  # Definir el método de pago
+                metodo_pago='Con Tarjeta', # Definir el método de pago
+                estado='Pagado', # Marcar el recibo como pagado
+             
             )
 
             # Configurar MailerSend
@@ -222,7 +224,9 @@ def create_payment_intents_cursos(request):
                     curso=curso,
                     fecha_pago=now(),
                     importe=curso.precio,
-                    metodo_pago="Con Tarjeta"
+                    metodo_pago="Con Tarjeta",
+                    estado="Pagado"
+
                 )
 
                 # Eliminar del carrito
@@ -300,7 +304,9 @@ def pago_efectivo(request, curso_id):
             curso=curso,
             fecha_pago=now(),
             importe=curso.precio,
-            metodo_pago="Efectivo"
+            metodo_pago="Efectivo",
+            estado="No Pagado"
+
         )
     
     api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
@@ -371,7 +377,9 @@ def pagos_efectivo(request):
                     curso=curso,
                     fecha_pago=now(),
                     importe=curso.precio,
-                    metodo_pago="Efectivo"
+                    metodo_pago="Efectivo",
+                    estado="No Pagado"
+
                 )
                 Carrito.objects.filter(usuario=request.user, curso=curso).delete()
                 recibos.append(recibo)
@@ -436,3 +444,10 @@ def mis_recibos(request):
     # Recuperar los recibos del usuario autenticado
     recibos = Recibo.objects.filter(usuario=request.user).order_by('-fecha_pago')  # Orden por fecha descendente
     return render(request, 'mis_recibos.html', {'recibos': recibos})
+
+@login_required
+def mis_cursos(request):
+    # Recuperar los cursos del usuario autenticado con recibos en estado 'Pagado'
+    cursos = Recibo.objects.filter(usuario=request.user, estado='Pagado').values_list('curso__id', flat=True)
+    cursos = Curso.objects.filter(id__in=cursos)
+    return render(request, 'mis_cursos.html', {'cursos': cursos})

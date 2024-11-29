@@ -19,6 +19,8 @@ urlpatterns = [
     path('resumen-compras/', views.resumen_compras, name='resumen_compras'),
     path('pagos_efectivo/', views.pagos_efectivo, name='pagos_efectivo'),
     path('create-payment-intents-cursos/', views.create_payment_intents_cursos, name='create_payment_intents_cursos'),
+    path('mis_cursos/', views.mis_cursos, name='mis_cursos'),
+    
 
 
 

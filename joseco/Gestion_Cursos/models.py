@@ -18,5 +18,13 @@ class Recibo(models.Model):
     fecha_pago = models.DateTimeField()
     importe = models.DecimalField(max_digits=8, decimal_places=2)
     metodo_pago = models.CharField(max_length=50)
+    estado = models.CharField(
+        max_length=10,
+        choices=[
+            ('Pagado', 'Pagado'),
+            ('No Pagado', 'No Pagado')
+        ],
+        default='No Pagado'
+    )
 
     

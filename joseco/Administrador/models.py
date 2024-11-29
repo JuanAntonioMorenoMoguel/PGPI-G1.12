@@ -1,12 +1,13 @@
 from django.db import models
 from django.forms import ValidationError
+from datetime import date
+from django import forms
 
 # Create your models here.
 
 class Curso(models.Model):
-    # Campo Nombre
+    # Campos del modelo
     nombre = models.CharField(max_length=200)
-    
 
     # Enumerado para Especialidad
     class EspecialidadChoices(models.TextChoices):
@@ -46,12 +47,26 @@ class Curso(models.Model):
 
     vacantes = models.PositiveIntegerField(default=0, verbose_name="Vacantes disponibles")
 
+    # Validaciones personalizadas en el nivel del modelo
+    def clean(self):
+        super().clean()
+
+        # Validar fecha de inicio
+        if self.fecha_inicio and self.fecha_inicio < date.today():
+            raise ValidationError({"fecha_inicio": "La fecha de inicio no puede ser anterior a hoy."})
+
+        # Validar fecha de finalización
+        if self.fecha_finalizacion and self.fecha_finalizacion < date.today() and self.fecha_finalizacion <= self.fecha_inicio:
+            raise ValidationError({"fecha_finalizacion": "La fecha de finalización no puede ser anterior a hoy ni anterior o igual a la fecha de inicio."})
+
+        # Validar relación entre fechas
+        if self.fecha_inicio and self.fecha_finalizacion and self.fecha_finalizacion == self.fecha_inicio:
+            raise ValidationError({"fecha_finalizacion": "La fecha de finalización igual a la fecha de inicio."})
 
     def __str__(self):
         return self.nombre
-    
+
     class Meta:
-        # app_label = 'auth'  # Asignar la sección "Autenticación y autorización"
         verbose_name = 'Curso'
         verbose_name_plural = 'Cursos'
 

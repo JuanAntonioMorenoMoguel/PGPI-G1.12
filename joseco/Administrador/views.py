@@ -3,9 +3,11 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView
 from .forms import CustomUserChangeForm, CustomUserCreationForm, CursoForm, HorarioForm
-from .models import Curso, Horario # Asegúrate de tener los modelos
+from .models import Curso, Horario
+from Gestion_Cursos.models import Recibo # Asegúrate de tener los modelos
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.utils.timezone import now
 
 
 @login_required
@@ -84,8 +86,8 @@ class CursoCreateView(CreateView):
     model = Curso
     form_class = CursoForm
     template_name = 'crear_curso.html'
-    success_url = reverse_lazy('admin_cursos')
-
+    success_url = reverse_lazy('lista_cursos')
+    
 # Vista para editar un curso
 def editar_curso(request, pk):
     curso = get_object_or_404(Curso, pk=pk)  # Obtiene el curso por su ID.
@@ -93,7 +95,7 @@ def editar_curso(request, pk):
         form = CursoForm(request.POST, instance=curso)  # Formulario con los datos existentes.
         if form.is_valid():
             form.save()
-            return redirect('admin_cursos')  # Redirige a la lista de cursos tras guardar.
+            return redirect('lista_cursos')  # Redirige a la lista de cursos tras guardar.
     else:
         form = CursoForm(instance=curso)  # Prellena el formulario con los datos actuales.
 
@@ -104,10 +106,10 @@ def eliminar_curso(request, pk):
     if request.method == "POST":
         curso.delete()
         messages.success(request, f"El curso {curso.nombre} ha sido eliminado exitosamente.")
-        return redirect('admin_cursos')
+        return redirect('lista_cursos')
     else:
         messages.error(request, "Método no permitido.")
-        return redirect('admin_cursos')
+        return redirect('lista_cursos')
 
 
 def lista_horarios(request):
@@ -144,3 +146,16 @@ def eliminar_horario(request, pk):
         horario.delete()
         return redirect('admin_horarios')
     return redirect('admin_horarios')
+
+def recibos_usuario(request, user_id):
+    usuario = get_object_or_404(User, id=user_id)
+    recibos = usuario.recibos.all()
+    return render(request, 'recibos_usuario.html', {'recibos': recibos, 'usuario': usuario})
+
+def cambiar_estado(request, recibo_id):
+    if request.method == 'POST':
+        recibo = get_object_or_404(Recibo, id=recibo_id)
+        if recibo.estado == 'No Pagado':
+            recibo.estado = 'Pagado'
+            recibo.save()
+        return redirect('recibos_usuario', user_id=recibo.usuario.id)
