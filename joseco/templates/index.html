@@ -7,6 +7,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/index.css' %}">
+<link rel="stylesheet" href="{% static 'css/cursos.css' %}">
 {% endblock extra_css %}
 
 {% block content %}
@@ -40,6 +41,41 @@
     </div>
 
     {% if not user.is_authenticated or user.is_authenticated and not user.is_superuser %}
+        <!-- Formulario de filtrado -->
+        <form method="get" class="form-filters" action="{% url 'filtrar_cursos' %}" style="margin-top: 20px">
+            <div class="filter-group">
+                <label for="id_nombre">Nombre del Curso:</label>
+                <div class="input-wrapper">
+                    {{ filtro.form.nombre }}
+                    <span class="clear-input" onclick="clearField('id_nombre')">🗑️</span>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label for="id_especialidad">Especialidad:</label>
+                {{ filtro.form.especialidad }}
+            </div>
+
+            <div class="filter-group">
+                <label for="id_modalidad">Modalidad:</label>
+                {{ filtro.form.modalidad }}
+            </div>
+
+            <div class="filter-group">
+                <label for="id_fecha_inicio">Fecha de Inicio:</label>
+                {{ filtro.form.fecha_inicio }}
+            </div>
+
+            <div class="filter-group">
+                <label for="id_fecha_finalizacion">Fecha de Fin:</label>
+                {{ filtro.form.fecha_finalizacion }}
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-filtrar">Filtrar</button>
+            </div>
+        </form>
+        <!-- Sección de cursos -->
         <div class="table_container">
                 {% if cursos %}
                     <h2 class="table-title" style="text-align: center; margin-bottom: 20px;">Alguno de nuestros cursos</h2>
@@ -80,7 +116,7 @@
                         </table>
                         {% if user.is_authenticated %}
                         <div style="text-align: center;">
-                            <a href="{% url 'lista_cursos' %}" class="btn btn-azul" style="margin-top: 20px;">Saber más!</a>
+                            <a href="{% url 'index' %}" class="btn btn-azul" style="margin-top: 20px;">Saber más!</a>
                         </div>
                         {% endif %}
                     </div>
