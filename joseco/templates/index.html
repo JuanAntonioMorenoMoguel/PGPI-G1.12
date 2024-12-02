@@ -75,7 +75,7 @@
                 <button type="submit" class="btn-filtrar">Filtrar</button>
             </div>
         </form>
-        <!-- Sección de cursos -->
+        {% comment %} <!-- Sección de cursos -->
         <div class="table_container">
                 {% if cursos %}
                     <h2 class="table-title" style="text-align: center; margin-bottom: 20px;">Alguno de nuestros cursos</h2>
@@ -114,13 +114,51 @@
                                 
                             </tbody>
                         </table>
-                        {% if user.is_authenticated %}
-                        <div style="text-align: center;">
-                            <a href="{% url 'index' %}" class="btn btn-azul" style="margin-top: 20px;">Saber más!</a>
-                        </div>
-                        {% endif %}
+                        
                     </div>
                 {% endif %}
+        </div> {% endcomment %}
+        <div id="cursoCarrusel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="d-flex align-items-center">
+                        <img src="{% static 'images/curso_justicia_digital.png' %}" class="d-block w-10 carousel-image" alt="Justicia Digital">
+                        <div>
+                            <h5>Introducción a la Justicia Digital</h5>
+                            <p>Explora los fundamentos del derecho en la era digital.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="d-flex align-items-center">
+                        <img src="{% static 'images/curso_sistema_sanitario.png' %}" class="d-block w-10 carousel-image" alt="Sistema Sanitario">
+                        <div>
+                            <h5>Gestión en el Sistema Sanitario</h5>
+                            <p>Conviértete en un líder en la administración sanitaria.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="d-flex align-items-center">
+                        <img src="{% static 'images/curso_programacion_educativa.png' %}" class="d-block w-10 carousel-image" alt="Programación Educativa">
+                        <div>
+                            <h5>Fundamentos de Programación Educativa</h5>
+                            <p>Aprende a implementar estrategias educativas innovadoras.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#cursoCarrusel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#cursoCarrusel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguiente</span>
+            </button>
+        </div>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="{% url 'lista_cursos' %}" class="btn btn-azul" style="margin-top: 20px;">Saber más!</a>
         </div>
     {% endif %}
 
