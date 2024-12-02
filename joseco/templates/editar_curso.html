@@ -8,7 +8,7 @@
 {% block content %}
 <div class="form-container">
     <h2>Editar Curso</h2>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         
         <div class="form-group">
@@ -54,6 +54,11 @@
         <div class="form-group">
             <label for="id_vacantes">Vacantes:</label>
             {{ form.vacantes }}
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="id_imagen">Imagen del Curso:</label>
+            {{ form.imagen }}
         </div>
 
         <form action="{% url 'lista_cursos' %}" method="post">

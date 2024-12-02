@@ -82,17 +82,22 @@ class CursoListView(ListView):
     context_object_name = 'cursos'
 
 # Vista para crear un curso
-class CursoCreateView(CreateView):
-    model = Curso
-    form_class = CursoForm
-    template_name = 'crear_curso.html'
-    success_url = reverse_lazy('lista_cursos')
+def crear_curso(request):
+    if request.method == 'POST':
+        form = CursoForm(request.POST, request.FILES)  # Asegúrate de usar request.FILES aquí
+        if form.is_valid():
+            form.save()
+            return redirect('lista_cursos')
+    else:
+        form = CursoForm()
+
+    return render(request, 'crear_curso.html', {'form': form})
     
 # Vista para editar un curso
 def editar_curso(request, pk):
     curso = get_object_or_404(Curso, pk=pk)  # Obtiene el curso por su ID.
     if request.method == 'POST':
-        form = CursoForm(request.POST, instance=curso)  # Formulario con los datos existentes.
+        form = CursoForm(request.POST, request.FILES, instance=curso)  # Formulario con los datos existentes.
         if form.is_valid():
             form.save()
             return redirect('lista_cursos')  # Redirige a la lista de cursos tras guardar.

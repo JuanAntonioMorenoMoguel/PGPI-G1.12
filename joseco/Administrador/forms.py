@@ -66,7 +66,7 @@ class CustomUserChangeForm(UserChangeForm):
 class CursoForm(forms.ModelForm):
     class Meta:
         model = Curso
-        fields = ['nombre', 'especialidad', 'modalidad', 'fecha_inicio', 'fecha_finalizacion', 'precio', 'vacantes']
+        fields = ['nombre', 'especialidad', 'modalidad', 'fecha_inicio', 'fecha_finalizacion', 'precio', 'vacantes', 'imagen']
         widgets = {
             'fecha_inicio': forms.DateInput(
                 attrs={
@@ -85,6 +85,7 @@ class CursoForm(forms.ModelForm):
             'modalidad': forms.Select(attrs={'class': 'form-control'}),
             'precio': forms.NumberInput(attrs={'class': 'form-control'}),
             'vacantes': forms.NumberInput(attrs={'class': 'form-control'}),
+            'imagen': forms.FileInput(attrs={'class': 'form-control'}),
         }
         
     def clean(self):

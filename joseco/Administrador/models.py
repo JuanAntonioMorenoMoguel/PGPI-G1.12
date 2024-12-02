@@ -48,7 +48,19 @@ class Curso(models.Model):
 
     vacantes = models.PositiveIntegerField(default=0, verbose_name="Vacantes disponibles")
 
+    imagen = models.ImageField(upload_to='imagenes_cursos', null=True, blank=True, verbose_name="Imagen del Curso")
 
+
+    def save(self, *args, **kwargs):
+        # Comprobar si ya existe una instancia y tiene una imagen
+        try:
+            this = Curso.objects.get(id=self.id)
+            if this.imagen != self.imagen and this.imagen:
+                this.imagen.delete(save=False)  # Eliminar la imagen anterior si se reemplaza
+        except Curso.DoesNotExist:
+            pass  # No hay instancia previa, es un nuevo objeto
+
+        super(Curso, self).save(*args, **kwargs)  # Guardar la nueva imagen
 
     # Validaciones personalizadas en el nivel del modelo
     def clean(self):

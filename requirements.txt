@@ -7,3 +7,4 @@ django-filter==23.2
 stripe
 mailersend
 whitenoise
+Pillow

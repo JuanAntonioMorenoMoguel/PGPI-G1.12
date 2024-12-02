@@ -1,5 +1,8 @@
 from django.urls import path
-from .views import UsuarioListView, CursoListView, admin_dashboard, eliminar_usuario, CursoCreateView, eliminar_curso, lista_horarios, crear_horario, editar_horario, eliminar_horario, editar_curso, crear_usuario, editar_usuario, recibos_usuario, cambiar_estado
+from .views import UsuarioListView, admin_dashboard, eliminar_usuario,eliminar_curso, lista_horarios, crear_horario, editar_horario, eliminar_horario, editar_curso, crear_usuario, editar_usuario, recibos_usuario, cambiar_estado, crear_curso
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
     path('dashboard/', admin_dashboard, name='admin_dashboard'),
@@ -9,7 +12,7 @@ urlpatterns = [
     path('usuarios/eliminar/<int:pk>/', eliminar_usuario, name='eliminar_usuario'),  # Nueva ruta
     path('usuarios/crear/',crear_usuario, name='crear_usuario'),
 
-    path('cursos/crear/', CursoCreateView.as_view(), name='crear_curso'),
+    path('cursos/crear/', crear_curso, name='crear_curso'),
     path('cursos/editar/<int:pk>/', editar_curso, name='editar_curso'),
     path('cursos/eliminar/<int:pk>/', eliminar_curso ,name='eliminar_curso'),  # Nueva ruta
     

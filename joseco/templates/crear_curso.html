@@ -7,30 +7,30 @@
 
 {% block content %}
 <div class="form-container">
-    <h2>Crear Curso</h2>
-    <form method="post">
+    <h2 class="text-center mb-4">Crear Curso</h2>
+    <!-- Aquí es donde necesitas incluir el atributo enctype -->
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        
         <!-- Campo: Nombre del curso -->
-        <div class="form-group">
+        <div class="form-group mb-3">
             <label for="id_nombre">Nombre del Curso:</label>
             {{ form.nombre }}
         </div>
 
         <!-- Campo: Especialidad -->
-        <div class="form-group">
+        <div class="form-group mb-3">
             <label for="id_especialidad">Especialidad:</label>
             {{ form.especialidad }}
         </div>
 
         <!-- Campo: Modalidad -->
-        <div class="form-group">
+        <div class="form-group mb-3">
             <label for="id_modalidad">Modalidad:</label>
             {{ form.modalidad }}
         </div>
 
         <!-- Campo: Fecha de Inicio -->
-        <div class="form-group">
+        <div class="form-group mb-3">
             <label for="id_fecha_inicio">Fecha de Inicio:</label>
             {{ form.fecha_inicio }}
             {% if form.fecha_inicio.errors %}
@@ -39,8 +39,9 @@
                 </div>
             {% endif %}
         </div>
-        
-        <div class="form-group">
+
+        <!-- Campo: Fecha de Finalización -->
+        <div class="form-group mb-3">
             <label for="id_fecha_finalizacion">Fecha de Finalización:</label>
             {{ form.fecha_finalizacion }}
             {% if form.fecha_finalizacion.errors %}
@@ -51,25 +52,28 @@
         </div>
 
         <!-- Campo: Vacantes -->
-        <div class="form-group">
+        <div class="form-group mb-3">
             <label for="id_vacantes">Vacantes Disponibles:</label>
             {{ form.vacantes }}
         </div>
 
         <!-- Campo: Precio -->
-        <div class="form-group">
+        <div class="form-group mb-3">
             <label for="id_precio">Precio:</label>
             {{ form.precio }}
         </div>
 
-        <!-- Botones -->
-        <form action="{% url 'lista_cursos' %}" method="post">
-            {% csrf_token %}
-            <div class="button-group">
-                <button type="submit" class="btn">Crear</button>
-            </div>
-        </form>
-        <a href="{% url 'lista_cursos' %}" class="btn btn-cancelar">Cancelar</a>
+        <!-- Campo: Imagen del Curso -->
+        <div class="form-group mb-3">
+            <label for="id_imagen">Imagen del Curso:</label>
+            {{ form.imagen }}
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="button-group d-flex gap-3">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="{% url 'lista_cursos' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
     </form>
 </div>
 {% endblock %}
