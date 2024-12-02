@@ -140,7 +140,8 @@ body {
     text-align: center;
     padding: 20px;
     max-width: 600px;
-    background-color: #ffffff; /* Fondo blanco */
+    background-color: #ffffff;
+    /* Fondo blanco */
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -164,4 +165,24 @@ body {
     display: flex;
     justify-content: center;
     gap: 20px;
+}
+
+.small-carousel {
+    max-width: 800px;
+    /* Ajusta el ancho máximo del carrusel */
+    margin: 0 auto;
+    /* Centra el carrusel horizontalmente */
+}
+
+.carousel-image {
+    max-height: 300px;
+    /* Ajusta la altura máxima de las imágenes */
+    object-fit: cover;
+    /* Asegura que la imagen se ajuste al contenedor sin distorsionarse */
+}
+
+.carousel-caption h5,
+.carousel-caption p {
+    color: black;
+    /* Cambia el color del texto a negro */
 }
