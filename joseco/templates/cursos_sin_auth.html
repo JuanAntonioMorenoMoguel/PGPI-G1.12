@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cursos.css' %}">
+{% endblock extra_css %}
+
+
+
+
+{% block content %}
+<h1 class="titulo text-center">Lista de Cursos</h1>
+
+<!-- Formulario de filtrado -->
+<form method="get" class="form-filters mb-4">
+    <div class="d-flex flex-wrap gap-4 justify-content-center">
+        <div class="filter-group">
+            <label for="id_nombre">Nombre del Curso:</label>
+            <div class="input-wrapper">
+                {{ filtro.form.nombre }}
+            </div>
+        </div>
+        <div class="filter-group">
+            <label for="id_especialidad">Especialidad:</label>
+            <div class="input-wrapper">
+                {{ filtro.form.especialidad }}
+            </div>
+        </div>
+        <div class="filter-group">
+            <label for="id_modalidad">Modalidad:</label>
+            <div class="input-wrapper">
+                {{ filtro.form.modalidad }}
+            </div>
+        </div>
+        <div class="filter-group">
+            <label for="id_fecha_inicio">Fecha de Inicio:</label>
+            <div class="input-wrapper">
+                {{ filtro.form.fecha_inicio }}
+            </div>
+        </div>
+        <div class="filter-group">
+            <label for="id_fecha_finalizacion">Fecha de Fin:</label>
+            <div class="input-wrapper">
+                {{ filtro.form.fecha_finalizacion }}
+            </div>
+        </div>
+        <div class="button-group d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <a href="{% url 'lista_cursos_sin_auth' %}" class="btn btn-danger">Resetear</a>
+        </div>
+    </div>
+</form>
+
+{% if user.is_superuser %}
+<div class="text-center mt-4 mb-4">
+    <a href="{% url 'crear_curso' %}" class="btn btn-success">+ Crear Curso</a>
+</div>
+{% endif %}
+
+
+<!-- Lista de cursos -->
+<div class="container">
+    {% if cursos %}
+        {% for curso in cursos %}
+        <div class="curso-card mb-4 p-3 border rounded">
+            <!-- Título del curso -->
+            <h3 class="curso-titulo">{{ curso.nombre }}</h3>
+            
+            <!-- Contenedor de imagen e información -->
+            <div class="row align-items-center">
+                <!-- Información del curso -->
+                <div class="col-md-8 curso-info">
+                    <p><strong>Especialidad:</strong> {{ curso.get_especialidad_display }}</p>
+                    <p><strong>Modalidad:</strong> {{ curso.get_modalidad_display }}</p>
+                    <p><strong>Fecha de Inicio:</strong> {{ curso.fecha_inicio }}</p>
+                    <p><strong>Fecha de Finalización:</strong> {{ curso.fecha_finalizacion }}</p>
+                    <p><strong>Vacantes:</strong> {{ curso.vacantes }}</p>
+                    <p><strong>Precio:</strong> {{ curso.precio }} €</p>
+                    <p><strong>Horarios:</strong></p>
+                    <ul>
+                        {% for horario in curso.horarios.all %}
+                        <li>{{ horario.dia }} de {{ horario.hora_inicio }} a {{ horario.hora_fin }}</li>
+                        {% empty %}
+                        <li>No hay horarios disponibles.</li>
+                        {% endfor %}
+                    </ul>
+
+                    <!-- Acciones del curso -->
+                    <div class="curso-acciones mt-3">
+                        {% if not user.is_superuser %}
+                            <form method="post" action="{% url 'agregar_a_carrito_sin_auth' curso.id %}" class="form-reserva" data-curso-id="{{ curso.id }}">
+                                {% csrf_token %}
+                                {% if curso.vacantes > 0 and curso.id not in carrito and curso.id not in recibos %}
+                                    <button type="button" class="btn btn-success me-2" onclick="reservarCurso({{ curso.id }})">Añadir al carrito</button>
+                                    <a href="{% url 'resumen_compra' curso.id %}" class="btn btn-primary">Comprar</a>
+                                {% elif curso.id in carrito %}
+                                    <button type="button" class="btn btn-secondary" disabled>Ya está en el carrito</button> 
+                                {% elif curso.id in recibos %}
+                                    <button type="button" class="btn btn-secondary" disabled>Ya reservado</button>
+                                {% elif curso.vacantes == 0 %}
+                                    <button type="button" class="btn btn-secondary" disabled>Sin plazas</button>
+                                {% endif %}
+                            </form>
+                        {% else %}
+                            <a href="{% url 'editar_curso' curso.id %}" class="btn btn-warning me-2">Editar</a>
+                            <form method="post" action="{% url 'eliminar_curso' curso.id %}" class="form-eliminar d-inline" onsubmit="return confirm('¿Eliminar este curso?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Imagen del curso -->
+                <div class="col-md-4 curso-imagen">
+                    {% if curso.imagen and curso.imagen.url %}
+                    <img src="{{ curso.imagen.url }}" alt="{{ curso.nombre }}" class="img-fluid w-100 h-100" style="object-fit: cover;">
+                    {% else %}
+                    <p>No hay imagen disponible.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-cursos text-center">No hay cursos disponibles.</p>
+    {% endif %}
+</div>
+
+
+
+<script>
+    function reservarCurso(cursoId) {
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+        // Utilizando fetch para realizar la solicitud POST
+        fetch(`/agregar-a-carrito-publico/${cursoId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,  // Token CSRF para la seguridad
+                'X-Requested-With': 'XMLHttpRequest'  // Para indicar que es una solicitud AJAX
+            },
+            body: JSON.stringify({ 'curso_id': cursoId }),  // Enviar el curso a través del body
+        })
+        .then(response => response.json())  // Procesamos la respuesta como JSON
+        .then(data => {
+            if (data.message) {
+                alert(data.message);  // Muestra el mensaje (ej. éxito o error)
+            }
+
+            // Actualiza la cantidad de cursos en el carrito
+            const carritoCantidad = document.getElementById('carrito-cantidad-sin-auth');
+            if (carritoCantidad) {
+                carritoCantidad.textContent = data.carrito_cantidad;
+            }
+
+            // Si todo fue correcto, recargamos la página para actualizar el carrito
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);  // Muestra cualquier error en la consola
+        });
+    }
+</script>
+
+{% endblock content %}
+
+

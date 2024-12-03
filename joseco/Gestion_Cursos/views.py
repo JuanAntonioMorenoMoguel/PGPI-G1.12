@@ -5,7 +5,7 @@ from django.shortcuts import get_list_or_404, render, redirect, get_object_or_40
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from .models import Curso, Carrito, Recibo
+from .models import Curso, Carrito, Recibo, CarritoNoAuth
 from .filters import CursoFilter
 from django.utils.timezone import now
 from django.conf import settings
@@ -24,6 +24,47 @@ def lista_cursos(request):
 
     return render(request, 'cursos.html', {'cursos': cursos_filtrados, 'filtro':filtro, 'carrito': list(carrito), 'recibos': recibos })
 
+def lista_cursos_sin_auth(request):
+    # Recuperar todos los cursos
+    cursos = Curso.objects.all()
+    
+    # Recibos: Para usuarios no autenticados, no hay recibos asociados
+    recibos = []
+
+    # Carrito: Manejar el carrito desde la sesión en lugar del usuario
+    carrito = request.session.get('carrito', [])
+
+    # Aplicar filtro a los cursos
+    filtro = CursoFilter(request.GET, queryset=cursos)
+    cursos_filtrados = filtro.qs
+
+    # Renderizar la plantilla con los datos necesarios
+    return render(request, 'cursos_sin_auth.html', {
+        'cursos': cursos_filtrados,
+        'filtro': filtro,
+        'carrito': carrito,
+        'recibos': recibos
+    })
+
+@csrf_exempt
+def agregar_a_carrito_sin_auth(request, curso_id):
+    curso = get_object_or_404(Curso, id=curso_id)
+        # Para usuarios no autenticados: Uso del modelo CarritoNoAuth
+    carrito_item, created = CarritoNoAuth.objects.get_or_create(curso=curso)
+    if not created:
+        carrito_item.cantidad += 1
+        carrito_item.save()
+    
+    carrito_cantidad = CarritoNoAuth.objects.count()
+
+    # Si la solicitud es AJAX
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            "message": "Curso añadido al carrito",
+            "carrito_cantidad": carrito_cantidad
+        })
+
+    return redirect('ver_carrito')
 
 
 @login_required
@@ -46,10 +87,24 @@ def eliminar_de_carrito(request, curso_id):
     item.delete()
     return redirect('ver_carrito')
 
+
+def eliminar_de_carrito_sin_auth(request, curso_id):
+    item = get_object_or_404(CarritoNoAuth, curso=curso_id)
+    item.delete()
+    return redirect('ver_carrito_sin_auth')
+
+
+
 @login_required
 def ver_carrito(request):
     carrito = Carrito.objects.filter(usuario=request.user)
     return render(request, 'ver_carrito.html', {'carrito': carrito})
+
+
+def ver_carrito_sin_auth(request):
+    carrito_items = CarritoNoAuth.objects.all()
+    return render(request, 'ver_carrito_sin_auth.html', {'carrito': carrito_items})
+
 
 @login_required
 def confirmar_reserva(request):
@@ -67,6 +122,13 @@ def carrito_cantidad(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         cantidad = Carrito.objects.filter(usuario=request.user).count()
         return JsonResponse({"carrito_cantidad": cantidad})
+    return JsonResponse({"error": "Acceso no permitido"}, status=403)
+
+def carrito_cantidad_sin_auth(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # Comprobar si es AJAX
+        carrito = request.session.get('carrito', [])
+        cantidad = len(carrito)
+        return JsonResponse({"carrito_cantidad_sin_auth": cantidad})
     return JsonResponse({"error": "Acceso no permitido"}, status=403)
 
 @login_required

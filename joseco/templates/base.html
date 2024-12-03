@@ -90,19 +90,21 @@
                     {% endif %}
                     <a class="nav-link" href="{% url 'perfil' %}">{{ user.email }}</a>
                     <a class="nav-link" href="{% url 'contacto' %}">Contáctanos</a>
+                    <a href="{% url 'ver_carrito' %}" class="nav-link d-flex align-items-center">
+                        🛒 Ver Cesta <span id="carrito-cantidad" class="ms-1">0</span>
+                    </a>
                     <form action="{% url 'cerrar_sesion' %}" method="post" class="d-inline">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-link nav-link p-0" style="text-decoration: none;">Cerrar Sesión</button>
                     </form>
                 {% else %}
                     <a href="{% url 'inicio_sesion' %}" class="btn btn-secondary">Acceso</a>
+                    <a href="{% url 'ver_carrito_sin_auth' %}" class="nav-link d-flex align-items-center">
+                    🛒 Ver Cesta <span id="carrito-cantidad-sin-auth" class="ms-1">0</span>
+                    </a>
                     <a class="nav-link" href="{% url 'contacto' %}">Contáctanos</a>
                 {% endif %}
-                {% if not user.is_superuser %}
-                <a href="{% url 'ver_carrito' %}" class="nav-link d-flex align-items-center">
-                    🛒 Ver Cesta <span id="carrito-cantidad" class="ms-1">0</span>
-                </a>
-                {% endif %}
+                
                 
 
                 <!-- Formulario para buscar recibo -->
@@ -122,6 +124,11 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+    // Obtener el valor de autenticación del usuario desde el span
+    const usuarioAutenticado = JSON.parse(document.getElementById('user-authenticated').textContent);
+        
+    if (usuarioAutenticado) {
+        // Si el usuario está autenticado, ejecutar el primer script
         fetch('/carrito-cantidad/', {
             method: 'GET',
             headers: {
@@ -135,7 +142,27 @@
                 carritoCantidad.textContent = data.carrito_cantidad;
             }
         })
-        .catch(error => console.error('Error al inicializar el carrito:', error));
-    });
+        .catch(error => console.error('Error al inicializar el carrito con autenticación:', error));
+    } else {
+        // Si el usuario no está autenticado, ejecutar el segundo script
+        fetch('/carrito-cantidad-sin-auth/', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const carritoCantidadSinAuth = document.getElementById('carrito-cantidad-sin-auth');
+            if (carritoCantidadSinAuth) {
+                carritoCantidadSinAuth.textContent = data.carrito_cantidad;
+            }
+        })
+        .catch(error => console.error('Error al inicializar el carrito sin autenticación:', error));
+    }
+});
+
 </script>
+
+
 </html>
