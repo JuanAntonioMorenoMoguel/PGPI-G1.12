@@ -510,9 +510,25 @@ def mis_cursos(request):
     return render(request, 'mis_cursos.html', {'cursos': cursos})
 
 def ver_recibo(request):
-    recibo_id = request.GET.get('id_recibo')
-    if recibo_id:
-        recibo = get_object_or_404(Recibo, id=recibo_id)
-        return render(request, 'recibo.html', {'recibo': recibo})
-    else:
-        return render(request, 'recibo.html', {'error': 'No se ha proporcionado un ID de recibo válido.'})
+    id_recibo = request.GET.get('id_recibo', '').strip()
+
+    # Si el ID está vacío, redirigir de nuevo a la página de "Mis Recibos"
+    if not id_recibo:
+        return redirect('mis_recibos')
+
+    try:
+        # Intentar convertir a entero
+        id_recibo = int(id_recibo)
+    except ValueError:
+        # Si no es un número, mostrar un mensaje de error y redirigir
+        messages.error(request, "El ID del recibo debe ser un número.")
+        return redirect('mis_recibos')
+
+    # Buscar el recibo o mostrar error si no existe
+    recibo = Recibo.objects.filter(id=id_recibo).first()
+    if not recibo:
+        messages.error(request, f"No existe ningún recibo con el ID {id_recibo}.")
+        return redirect('mis_recibos')
+
+    # Si se encuentra el recibo, mostrar la plantilla con la información del recibo
+    return render(request, 'recibo.html', {'recibo': recibo})

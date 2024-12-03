@@ -3,40 +3,145 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/mis_recibos.css' %}">
+<style>
+    .recibos-container {
+        position: relative;
+        max-width: 600px;
+        margin: auto;
+        text-align: center;
+    }
+    .recibo-card {
+        display: none;
+        background-color: #ffffff;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .recibo-card.active {
+        display: block;
+    }
+    .navigation-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 2rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+        outline: none;
+    }
+    .navigation-btn.left {
+        left: -50px;
+    }
+    .navigation-btn.right {
+        right: -50px;
+    }
+
+    
+</style>
 {% endblock extra_css %}
 
-{% block content %}
-<form action="{% url 'ver_recibo' %}" method="get" style="display: inline;">
-    {% csrf_token %}
-    <input type="text" name="id_recibo" placeholder="Buscar recibo por ID" class="form-control" style="width: 200px; display: inline;">
-    <button type="submit" class="btn btn-secondary">Buscar Recibo</button>
-</form>
-<div class="recibos-container">
-    <h2 class="titulo">Mis Recibos</h2>
 
-    <!-- Contenedor con scrollbar -->
-    <div class="scrollable-recibos">
-        {% for recibo in recibos %}
-        <div class="datos-curso fondo-blanco">
-            <h3>Datos del Curso</h3>
-            <p><strong>Nombre del Curso:</strong> {{ recibo.curso.nombre }}</p>
-            <p><strong>Especialidad:</strong> {{ recibo.curso.get_especialidad_display }}</p>
-            <p><strong>Modalidad:</strong> {{ recibo.curso.get_modalidad_display }}</p>
-            <p><strong>Fecha de Inicio:</strong> {{ recibo.curso.fecha_inicio }}</p>
-            <p><strong>Fecha de Finalización:</strong> {{ recibo.curso.fecha_finalizacion }}</p>
-            
-            <h3 class="spacing">Datos del Pago</h3>
-            <p><strong>Recibo:</strong> {{ recibo.id }}</p>
-            <p><strong>Nombre Completo:</strong> {{ recibo.usuario.first_name }} {{ recibo.usuario.last_name }}</p>
-            <p><strong>Email:</strong> {{ recibo.usuario.email }}</p>
-            <p><strong>Importe:</strong> {{ recibo.importe }} €</p>
-            <p><strong>Método de Pago:</strong> {{ recibo.metodo_pago }}</p>
-            <p><strong>Fecha de Pago:</strong> {{ recibo.fecha_pago|date:"d/m/Y H:i" }}</p>
-            <p><strong>Estado:</strong> {{ recibo.get_estado_display }}</p>
-        </div>
-        {% empty %}
-        <p class="sin-recibos">No tienes recibos registrados.</p>
-        {% endfor %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Formulario de Búsqueda -->
+    <div class="text-center mb-4">
+        <form action="{% url 'ver_recibo' %}" method="get" class="d-inline-flex align-items-center justify-content-center">
+            {% csrf_token %}
+            <input type="text" name="id_recibo" placeholder="Buscar recibo por ID" class="form-control me-2" style="width: 250px;">
+            <button type="submit" class="btn btn-secondary">Buscar Recibo</button>
+        </form>
+    </div>
+
+
+    <!-- Título de Mis Recibos -->
+    <h2 class="titulo text-center mb-4">Mis Recibos</h2>
+
+    <!-- Contenedor de Recibos -->
+    <div class="recibos-container">
+        {% if recibos %}
+            <button class="navigation-btn left" onclick="changeRecibo(-1)">&#8249;</button>
+            {% for recibo in recibos %}
+            <div class="recibo-card" id="recibo-{{ forloop.counter }}">
+                <h3 class="text-primary mb-3">Datos del Curso</h3>
+                <p><strong>Nombre del Curso:</strong> {{ recibo.curso.nombre }}</p>
+                <p><strong>Especialidad:</strong> {{ recibo.curso.get_especialidad_display }}</p>
+                <p><strong>Modalidad:</strong> {{ recibo.curso.get_modalidad_display }}</p>
+                <p><strong>Fecha de Inicio:</strong> {{ recibo.curso.fecha_inicio }}</p>
+                <p><strong>Fecha de Finalización:</strong> {{ recibo.curso.fecha_finalizacion }}</p>
+
+                <h3 class="text-primary mt-4 mb-3">Datos del Pago</h3>
+                <p><strong>Recibo:</strong> {{ recibo.id }}</p>
+                <p><strong>Nombre Completo:</strong> {{ recibo.usuario.first_name }} {{ recibo.usuario.last_name }}</p>
+                <p><strong>Email:</strong> {{ recibo.usuario.email }}</p>
+                <p><strong>Importe:</strong> {{ recibo.importe }} €</p>
+                <p><strong>Método de Pago:</strong> {{ recibo.metodo_pago }}</p>
+                <p><strong>Fecha de Pago:</strong> {{ recibo.fecha_pago|date:"d/m/Y H:i" }}</p>
+                <p><strong>Estado:</strong> {{ recibo.get_estado_display }}</p>
+            </div>
+            {% endfor %}
+            <button class="navigation-btn right" onclick="changeRecibo(1)">&#8250;</button>
+        {% else %}
+        <p class="text-center text-muted">No tienes recibos registrados.</p>
+        {% endif %}
     </div>
 </div>
+
+<script>
+    let currentReciboIndex = 1;
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        showRecibo(currentReciboIndex);
+    });
+
+    function showRecibo(index) {
+        const recibos = document.querySelectorAll('.recibo-card');
+        recibos.forEach((recibo, i) => {
+            recibo.classList.remove('active');
+            if (i === index - 1) {
+                recibo.classList.add('active');
+            }
+        });
+    }
+
+    function changeRecibo(step) {
+        const recibos = document.querySelectorAll('.recibo-card');
+        currentReciboIndex += step;
+
+        if (currentReciboIndex > recibos.length) {
+            currentReciboIndex = 1; // Ir al primer recibo si está al final
+        }
+        if (currentReciboIndex < 1) {
+            currentReciboIndex = recibos.length; // Ir al último recibo si está al principio
+        }
+
+        showRecibo(currentReciboIndex);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputRecibo = document.querySelector('input[name="id_recibo"]');
+        const messages = document.querySelectorAll('.alert.alert-danger');
+
+        if (messages.length > 0 && inputRecibo) {
+            // Agrega la clase de error para cambiar el color del borde
+            inputRecibo.classList.add('input-error');
+
+            // Agrega la clase para el efecto de vibración
+            inputRecibo.classList.add('shake');
+
+            // Remueve el efecto de vibración después de 0.5 segundos
+            setTimeout(() => {
+                inputRecibo.classList.remove('shake');
+            }, 500);
+
+            // Remueve el color rojo después de 1.5 segundos
+            setTimeout(() => {
+                inputRecibo.classList.remove('input-error');
+            }, 1500);
+        }
+    });
+
+</script>
 {% endblock %}

@@ -7,27 +7,36 @@
 {% endblock extra_css %}
 
 {% block content %}
-<div class="recibo-container">
-    <h2>Recibo de Pago</h2>
-    
-    <div class="datos-curso">
-        <h3>Datos del Curso</h3>
-        <p><strong>Nombre del Curso:</strong> {{ recibo.curso.nombre }}</p>
-        <p><strong>Especialidad:</strong> {{ recibo.curso.get_especialidad_display }}</p>
-        <p><strong>Modalidad:</strong> {{ recibo.curso.get_modalidad_display }}</p>
-        <p><strong>Fecha de Inicio:</strong> {{ recibo.curso.fecha_inicio }}</p>
-        <p><strong>Fecha de Finalización:</strong> {{ recibo.curso.fecha_finalizacion }}</p>
+<div class="container mt-2">
+    <!-- Título del Recibo -->
+    <h2 class="text-center mb-4">Recibo de Pago</h2>
+
+    <!-- Contenedor del Recibo -->
+    <div class="card mx-auto shadow-lg" style="max-width: 600px;">
+        <div class="card-body">
+            <!-- Datos del Curso -->
+            <h3 class="card-title text-primary border-bottom pb-2 mb-3">Datos del Curso</h3>
+            <p><strong>Nombre del Curso:</strong> {{ recibo.curso.nombre }}</p>
+            <p><strong>Especialidad:</strong> {{ recibo.curso.get_especialidad_display }}</p>
+            <p><strong>Modalidad:</strong> {{ recibo.curso.get_modalidad_display }}</p>
+            <p><strong>Fecha de Inicio:</strong> {{ recibo.curso.fecha_inicio|date:"d/m/Y" }}</p>
+            <p><strong>Fecha de Finalización:</strong> {{ recibo.curso.fecha_finalizacion|date:"d/m/Y" }}</p>
+
+            <!-- Datos del Pago -->
+            <h3 class="card-title text-primary border-bottom pb-2 mt-4 mb-3">Datos del Pago</h3>
+            <p><strong>Recibo ID:</strong> {{ recibo.id }}</p>
+            <p><strong>Nombre Completo:</strong> {{ recibo.usuario.first_name }} {{ recibo.usuario.last_name }}</p>
+            <p><strong>Email:</strong> {{ recibo.usuario.email }}</p>
+            <p><strong>Importe:</strong> {{ recibo.importe }} €</p>
+            <p><strong>Método de Pago:</strong> {{ recibo.metodo_pago }}</p>
+            <p><strong>Fecha de Pago:</strong> {{ recibo.fecha_pago|date:"d/m/Y H:i" }}</p>
+            <p><strong>Estado:</strong> {{ recibo.get_estado_display }}</p>
+        </div>
     </div>
-    
-    <div class="datos-pago">
-        <h3>Datos del Pago</h3>
-        <p><strong>Recibo:</strong> {{ recibo.id }}</p>
-        <p><strong>Nombre Completo:</strong> {{ recibo.usuario.first_name }} {{ recibo.usuario.last_name }}</p>
-        <p><strong>Email:</strong> {{ recibo.usuario.email }}</p>
-        <p><strong>Importe:</strong> {{ recibo.importe }} €</p>
-        <p><strong>Método de Pago:</strong> {{ recibo.metodo_pago }}</p>
-        <p><strong>Fecha de Pago:</strong> {{ recibo.fecha_pago|date:"d/m/Y H:i" }}</p>
-        <p><strong>Estado:</strong> {{ recibo.get_estado_display }}</p>
+
+    <!-- Botón de Volver a Mis Recibos -->
+    <div class="text-center mt-4">
+        <a href="/mis_recibos/" class="btn btn-primary">Volver a Mis Recibos</a>
     </div>
 </div>
 {% endblock %}

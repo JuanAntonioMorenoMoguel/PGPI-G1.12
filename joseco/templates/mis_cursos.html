@@ -5,62 +5,61 @@
 <link rel="stylesheet" href="{% static 'css/cursos.css' %}">
 {% endblock extra_css %}
 
-
-
 {% block content %}
-<h1 class="titulo">Mis Cursos</h1>
+<div class="container mt-5">
+    <h1 class="titulo text-center mb-4">Mis Cursos</h1>
 
-<div class="tabla-scrollable">
-    <table class="custom-table">
-        <thead>
-            <tr>
-                <th>Nombre del Curso</th>
-                <th>Especialidad</th>
-                <th>Modalidad</th>
-                <th>Fecha Inicio</th>
-                <th>Fecha Finalización</th>
-                <th>Detalles</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for curso in cursos %}
-            <tr>
-                <td>{{ curso.nombre }}</td>
-                <td>{{ curso.get_especialidad_display }}</td>
-                <td>{{ curso.get_modalidad_display }}</td>
-                <td>{{ curso.fecha_inicio }}</td>
-                <td>{{ curso.fecha_finalizacion }}</td>
-                <td>
-                    <button class="btn-detalles" onclick="toggleDetails('detalles-{{ curso.id }}')">Ver Detalles</button>
-                </td>
-                
-            </tr>
-            <tr id="detalles-{{ curso.id }}" class="fila-detalles hidden">
-                <td colspan="7">
-                    <div class="detalle-curso">
-                        <p><strong>Precio:</strong> {{ curso.precio }} €</p>
-                        <p><strong>Horarios:</strong></p>
-                        <ul>
-                            {% for horario in curso.horarios.all %}
-                            <li>{{ horario.dia }} de {{ horario.hora_inicio }} a {{ horario.hora_fin }}</li>
-                            {% empty %}
-                            <li>No hay horarios disponibles para este curso.</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" class="no-cursos">No hay cursos disponibles.</td>
-            </tr>
-            {% endfor %}
-            </div>
-        </tbody>
-    </table>
+    {% if cursos %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr class="text-center">
+                    <th>Nombre del Curso</th>
+                    <th>Especialidad</th>
+                    <th>Modalidad</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Finalización</th>
+                    <th>Detalles</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for curso in cursos %}
+                <tr class="text-center">
+                    <td>{{ curso.nombre }}</td>
+                    <td>{{ curso.get_especialidad_display }}</td>
+                    <td>{{ curso.get_modalidad_display }}</td>
+                    <td>{{ curso.fecha_inicio }}</td>
+                    <td>{{ curso.fecha_finalizacion }}</td>
+                    <td>
+                        <button class="btn btn-info btn-sm" onclick="toggleDetails('detalles-{{ curso.id }}')">Ver Detalles</button>
+                    </td>
+                </tr>
+                <tr id="detalles-{{ curso.id }}" class="fila-detalles d-none">
+                    <td colspan="6">
+                        <div class="detalle-curso p-3">
+                            <p><strong>Precio:</strong> {{ curso.precio }} €</p>
+                            <p><strong>Horarios:</strong></p>
+                            <ul>
+                                {% for horario in curso.horarios.all %}
+                                <li>{{ horario.dia }} de {{ horario.hora_inicio }} a {{ horario.hora_fin }}</li>
+                                {% empty %}
+                                <li>No hay horarios disponibles para este curso.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-center text-muted">No tienes cursos disponibles.</p>
+    {% endif %}
+
     {% if user.is_superuser %}
-    <div style="margin-top: 20px; text-align: center;">
-        <a href="{% url 'crear_curso' %}" class="btn btn-verde">+ Crear Curso</a>
+    <div class="text-center mt-4">
+        <a href="{% url 'crear_curso' %}" class="btn btn-success">+ Crear Curso</a>
     </div>
     {% endif %}
 </div>
@@ -68,44 +67,8 @@
 <script>
     function toggleDetails(id) {
         const detalles = document.getElementById(id);
-        detalles.classList.toggle('hidden');
+        detalles.classList.toggle('d-none');
     }
 </script>
-
-<script>
-    function clearField(fieldId) {
-        document.getElementById(fieldId).value = '';
-    }
-</script>
-
-<script>
-    function reservarCurso(cursoId) {
-        const url = `/agregar-a-carrito/${cursoId}/`;
-        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                //alert(data.message); // Opcional: mostrar un mensaje al usuario
-            }
-            // Actualizar el contador del carrito
-            const carritoCantidad = document.getElementById('carrito-cantidad');
-            if (carritoCantidad) {
-                carritoCantidad.textContent = data.carrito_cantidad;
-            }
-            location.reload();
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-</script>
-
 
 {% endblock content %}
