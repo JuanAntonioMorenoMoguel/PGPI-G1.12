@@ -98,9 +98,12 @@
                     <a href="{% url 'inicio_sesion' %}" class="btn btn-secondary">Acceso</a>
                     <a class="nav-link" href="{% url 'contacto' %}">Contáctanos</a>
                 {% endif %}
+                {% if not user.is_superuser %}
                 <a href="{% url 'ver_carrito' %}" class="nav-link d-flex align-items-center">
                     🛒 Ver Cesta <span id="carrito-cantidad" class="ms-1">0</span>
                 </a>
+                {% endif %}
+                
 
                 <!-- Formulario para buscar recibo -->
                 {% if not user.is_authenticated %}

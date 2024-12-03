@@ -13,9 +13,6 @@
     <p style="margin-bottom:5px">Nombre: {{ user_profile.first_name }} {{ user_profile.last_name }}</p>
     <p style="margin-bottom:5px">Correo electrónico: {{ user_profile.email }}</p>
     <button type="button" class="btn btn-primary w-100 mt-3" onclick="window.location.href='{% url 'editar_perfil' %}'"style="margin-bottom:10px">Editar Perfil</button>
-    <form method="POST" action="{% url 'eliminar_cuenta' %}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.');">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger w-100 mt-3">Eliminar Cuenta</button>
-    </form>
+    <a href="{% url 'index' %}" class="btn btn-secondary">Cancelar</a>
 </div>
 {% endblock content %}

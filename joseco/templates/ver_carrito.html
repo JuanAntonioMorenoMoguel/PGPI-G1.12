@@ -6,38 +6,47 @@
 {% endblock extra_css %}
 
 {% block content %}
-<h1 class="titulo">Cesta de la Compra</h1>
+<div class="container mt-5">
+    <h1 class="titulo text-center mb-4">Cesta de la Compra</h1>
 
-<form method="post" action="{% url 'resumen_compras' %}">
-    {% csrf_token %}
-    <table class="custom-table">
-        <thead>
-            <tr>
-                <th>Seleccionar</th>
-                <th>Nombre del Curso</th>
-                <th>Cantidad</th>
-                <th>Precio</th>
-                <th>Eliminar curso</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in carrito %}
-            <tr>
-                <td>
-                    <input type="checkbox" name="cursos_seleccionados" value="{{ item.curso.id }}">
-                </td>
-                <td>{{ item.curso.nombre }}</td>
-                <td>{{ item.cantidad }}</td>
-                <td>{{ item.curso.precio }} €</td>
-                <td>
-                    <a href="{% url 'eliminar_de_carrito' item.curso.id %}" class="btn-reserva">Eliminar</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% if carrito %}
+    <form method="post" action="{% url 'resumen_compras' %}">
+        {% csrf_token %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark">
+                    <tr class="text-center">
+                        <th scope="col">Seleccionar</th>
+                        <th scope="col">Nombre del Curso</th>
+                        <th scope="col">Cantidad</th>
+                        <th scope="col">Precio</th>
+                        <th scope="col">Eliminar Curso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in carrito %}
+                    <tr>
+                        <td class="text-center">
+                            <input type="checkbox" name="cursos_seleccionados" value="{{ item.curso.id }}">
+                        </td>
+                        <td>{{ item.curso.nombre }}</td>
+                        <td class="text-center">{{ item.cantidad }}</td>
+                        <td class="text-center">{{ item.curso.precio }} €</td>
+                        <td class="text-center">
+                            <a href="{% url 'eliminar_de_carrito' item.curso.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    <button type="submit" class="btn-confirmar">Reservar cursos seleccionados</button>
-</form>
-
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">Reservar cursos seleccionados</button>
+        </div>
+    </form>
+    {% else %}
+    <p class="text-center text-muted">No tienes cursos en la cesta actualmente.</p>
+    {% endif %}
+</div>
 {% endblock content %}
