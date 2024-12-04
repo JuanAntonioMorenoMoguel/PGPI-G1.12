@@ -1,13 +1,14 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView
 from .forms import CustomUserChangeForm, CustomUserCreationForm, CursoForm, HorarioForm
 from .models import Curso, Horario
 from Gestion_Cursos.models import Recibo # Asegúrate de tener los modelos
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.utils.timezone import now
+from Gestion_Cursos.models import Recibo, ReciboNoAuth
 
 
 @login_required
@@ -19,6 +20,7 @@ def admin_dashboard(request):
             {'nombre': 'Usuarios', 'url': 'admin_usuarios'},
             {'nombre': 'Cursos', 'url': 'admin_cursos'},
             {'nombre': 'Horarios', 'url': 'admin_horarios'},
+            {'nombre': 'Recibos', 'url': 'admin_recibos'},
         ]
     }
     return render(request, 'dashboard.html', context)
@@ -152,11 +154,26 @@ def eliminar_horario(request, pk):
         return redirect('admin_horarios')
     return redirect('admin_horarios')
 
+def lista_recibos(request):
+    recibos = []
+    recibosAuth = Recibo.objects.all()
+    for recibo in recibosAuth:
+        user = User.objects.get(id=recibo.usuario_id)
+        recibo.nombre = user.nombre
+        recibo.email = user.email
+        recibo.auth = True
+    recibosNoAuth =ReciboNoAuth.objects.all()
+    for recibo in recibosNoAuth:
+        recibo.auth = False
+        recibos.append(recibo)
+    return render(request, 'recibos_list.html', {'recibos': recibos})
+
 def recibos_usuario(request, user_id):
     usuario = get_object_or_404(User, id=user_id)
     recibos = usuario.recibos.all()
     return render(request, 'recibos_usuario.html', {'recibos': recibos, 'usuario': usuario})
 
+#aaa
 def cambiar_estado(request, recibo_id):
     if request.method == 'POST':
         recibo = get_object_or_404(Recibo, id=recibo_id)
@@ -164,3 +181,11 @@ def cambiar_estado(request, recibo_id):
             recibo.estado = 'Pagado'
             recibo.save()
         return redirect('recibos_usuario', user_id=recibo.usuario.id)
+
+def cambiar_estado_no_auth(request, recibo_id):
+    if request.method == 'POST':
+        recibo = get_object_or_404(ReciboNoAuth, id=recibo_id)
+        if recibo.estado == 'No Pagado':
+            recibo.estado = 'Pagado'
+            recibo.save()
+        return redirect('admin_recibos')

@@ -25,6 +25,7 @@
                             <a class="button-primary" href="{% url 'admin_usuarios' %}">Usuarios</a>
                             <a class="button-primary" href="{% url 'lista_cursos' %}">Cursos</a>
                             <a class="button-primary" href="{% url 'admin_horarios' %}">Horarios</a>
+                            <a class="button-primary" href="{% url 'admin_recibos' %}">Recibos</a>
                         </div>
                 {% else %}
                     <h1>Oposiciones 2025: Abierto plazo de MATRÍCULA</h1>
@@ -159,9 +160,19 @@
                             <div>
                                 <h5>Introducción a la Justicia Digital</h5>
                                 <p>Explora los fundamentos del derecho en la era digital.</p>
-                                <!--Boton para comprar el curso-->
-                                <button type="button" class="btn btn-success me-2" onclick="reservarCurso({{ 1 }})">Añadir al carrito</button>
+                                {% if user.is_authenticated %}
+                                <form method="post" action="{% url 'agregar_a_carrito' 1 %}" class="form-reserva" data-curso-id="{{ 1 }}">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn btn-success me-2" onclick="reservarCurso({{ 1 }})">Añadir al carrito</button>
                                     <a href="{% url 'resumen_compra' 1 %}" class="btn btn-primary">Comprar</a>
+                                </form>
+                                {% else %}
+                                <form method="post" action="{% url 'agregar_a_carrito_no_auth' 1 %}" class="form-reserva" data-curso-id="{{ 1 }}">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn btn-success me-2" onclick="reservarCursoNoAuth({{ 1 }})">Añadir al carrito</button>
+                                    <a href="{% url 'resumen_compra_no_auth' 1 %}" class="btn btn-primary">Comprar</a>
+                                </form>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -177,8 +188,19 @@
                             <div>
                                 <h5>Gestión en el Sistema Sanitario</h5>
                                 <p>Conviértete en un líder en la administración sanitaria.</p>
-                                <button type="button" class="btn btn-success me-2" onclick="reservarCurso({{ 2 }})">Añadir al carrito</button>
+                                {% if user.is_authenticated %}
+                                <form method="post" action="{% url 'agregar_a_carrito' 2 %}" class="form-reserva" data-curso-id="{{ 2 }}">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn btn-success me-2" onclick="reservarCurso({{ 2 }})">Añadir al carrito</button>
                                     <a href="{% url 'resumen_compra' 2 %}" class="btn btn-primary">Comprar</a>
+                                </form>
+                                {% else %}
+                                <form method="post" action="{% url 'agregar_a_carrito_no_auth' 2 %}" class="form-reserva" data-curso-id="{{ 2 }}">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn btn-success me-2" onclick="reservarCursoNoAuth({{ 2 }})">Añadir al carrito</button>
+                                    <a href="{% url 'resumen_compra_no_auth' 2 %}" class="btn btn-primary">Comprar</a>
+                                </form>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -194,8 +216,19 @@
                             <div>
                                 <h5>Fundamentos de Programación Educativa</h5>
                                 <p>Aprende a implementar estrategias educativas innovadoras.</p>
-                                <button type="button" class="btn btn-success me-2" onclick="reservarCurso({{ 3 }})">Añadir al carrito</button>
+                                {% if user.is_authenticated %}
+                                <form method="post" action="{% url 'agregar_a_carrito' 3 %}" class="form-reserva" data-curso-id="{{ 3 }}">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn btn-success me-2" onclick="reservarCurso({{ 3 }})">Añadir al carrito</button>
                                     <a href="{% url 'resumen_compra' 3 %}" class="btn btn-primary">Comprar</a>
+                                </form>
+                                {% else %}
+                                <form method="post" action="{% url 'agregar_a_carrito_no_auth' 3 %}" class="form-reserva" data-curso-id="{{ 3 }}">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn btn-success me-2" onclick="reservarCursoNoAuth({{ 3 }})">Añadir al carrito</button>
+                                    <a href="{% url 'resumen_compra_no_auth' 3 %}" class="btn btn-primary">Comprar</a>
+                                </form>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -230,5 +263,56 @@
             Grupos reducidos.
         </p>
     </footer>
+
+    <script>
+        function reservarCurso(cursoId) {
+            const url = `/agregar-a-carrito/${cursoId}/`;
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
     
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                }
+                const carritoCantidad = document.getElementById('carrito-cantidad');
+                if (carritoCantidad) {
+                    carritoCantidad.textContent = data.carrito_cantidad;
+                }
+                
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    
+        function reservarCursoNoAuth(cursoId) {
+            const url = `/agregar-a-carrito-no-auth/${cursoId}/`;
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                }
+                const carritoCantidad = document.getElementById('carrito-cantidad');
+                if (carritoCantidad) {
+                    carritoCantidad.textContent = data.carrito_cantidad;
+                }
+                
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
 {% endblock content %}

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import UsuarioListView, admin_dashboard, eliminar_usuario,eliminar_curso, lista_horarios, crear_horario, editar_horario, eliminar_horario, editar_curso, crear_usuario, editar_usuario, recibos_usuario, cambiar_estado, crear_curso
+from .views import UsuarioListView, admin_dashboard, eliminar_usuario,eliminar_curso, lista_horarios, crear_horario, editar_horario, eliminar_horario, editar_curso, crear_usuario, editar_usuario, recibos_usuario, cambiar_estado, crear_curso, lista_recibos, cambiar_estado_no_auth
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -20,8 +20,10 @@ urlpatterns = [
     path('horarios/crear/', crear_horario, name='crear_horario'),
     path('horarios/<int:pk>/editar/', editar_horario, name='editar_horario'),
     path('horarios/<int:pk>/eliminar/', eliminar_horario, name='eliminar_horario'),
-
+    
+    path('recibos', lista_recibos, name='admin_recibos'),
     path('recibos_usuario/<int:user_id>/', recibos_usuario, name='recibos_usuario'),
     path('cambiar_estado/<int:recibo_id>/', cambiar_estado, name='cambiar_estado'),
+    path('cambiar_estado_no_auth/<int:recibo_id>/', cambiar_estado_no_auth, name='cambiar_estado_no_auth'),
 
 ]

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/table.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="table-container">
+    <h1 class="titulo">Lista de Recibos</h1>
+    
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Curso</th>
+                <th>Nombre usuario</th>
+                <th>Correo</th>
+                <th>Fecha de Pago</th>
+                <th>Importe</th>
+                <th>Método de Pago</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recibo in recibos %}
+            <tr>
+                <td>{{ recibo.id }}</td>
+                <td>{{ recibo.curso_id }}</td>
+                <td>{{ recibo.nombre }}</td>
+                <td>{{ recibo.email }}</td>
+                <td>{{ recibo.fecha_pago }}</td>
+                <td>{{ recibo.importe }}</td>
+                <td>{{ recibo.metodo_pago }}</td>
+                <td>{{ recibo.estado }}</td>
+                <td>
+                    {% if recibo.estado == 'No Pagado' %}
+                        {% if recibo.auth %}
+                        <form method="post" action="{% url 'cambiar_estado' recibo.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-azul">Marcar como Pagado</button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="{% url 'cambiar_estado_no_auth' recibo.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-azul">Marcar como Pagado</button>
+                        </form>
+                        {% endif %}
+                    {% endif %}
+                </td> 
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
