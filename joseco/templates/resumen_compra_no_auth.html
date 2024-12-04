@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/resumen_compra.css' %}">
+  <link rel="stylesheet" href="{% static 'css/estilosbase.css' %}">
+  <style>
+    /* Estilos para el modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 30%;
+      text-align: center;
+      border-radius: 8px;
+    }
+    .modal-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .modal-buttons button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .modal-buttons .confirm {
+      background-color: #28a745;
+      color: white;
+    }
+    .modal-buttons .cancel {
+      background-color: #dc3545;
+      color: white;
+    }
+  </style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="content-wrapper">
+  <div class="form-container mt-5">
+    <h2>Resumen de compra</h2>
+
+    <div class="contact-info mt-5">
+        <p><strong>Nombre del curso:</strong> {{ curso.nombre }}</p>
+        <p><strong>Especialidad:</strong> {{ curso.especialidad }}</p>
+        <p><strong>Modalidad:</strong> {{ curso.modalidad }}</p>
+        <p><strong>Fecha de inicio:</strong> {{ curso.fecha_inicio }}</p>
+        <p><strong>Fecha de finalización:</strong> {{ curso.fecha_finalizacion }}</p>
+        <p><strong>Horarios:</strong></p>
+        <div class="horarios">
+            {% for horario in curso.horarios.all %}
+                <p>{{ horario.dia }} de {{ horario.hora_inicio }} a {{ horario.hora_fin }}</p>
+            {% empty %}
+                <p>No hay horarios disponibles para este curso.</p>
+            {% endfor %}
+        </div>
+        <p><strong>Subtotal del curso:</strong> {{ curso.precio }} €</p>
+        <p><strong>Gastos de gestión del pedido:</strong> {{ gastos_gestion }} €</p>
+        <p><strong>Total a pagar:</strong> {{ total_precio }} €</p>
+    </div>
+  </div>
+
+  <div class="form-container mt-5">
+    <h2>Información del usuario</h2>
+    <div class="user-info mt-5">
+        <div class="mb-3">
+            <label for="usuario" class="form-label"><strong>Nombre:</strong></label>
+            <input type="text" id="usuario" name="usuario" class="form-control" value="{{ nombre }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label"><strong>Email:</strong></label>
+            <input type="email" id="email" name="email" class="form-control" value="{{ email }}" required>
+        </div>
+    </div>
+  </div>
+
+
+  <a class="button-primary" href="{% url 'datos_pago_no_auth' curso.id %}">Pagar con tarjeta</a>
+  <form id="efectivoForm" action="{% url 'pago_efectivo_no_auth' curso.id %}" method="POST">
+    {% csrf_token %}
+    <input type="hidden" id="hiddenUsuario" name="nombre" value="{{ nombre }}">
+    <input type="hidden" id="hiddenEmail" name="email" value="{{ email }}">
+    <button type="button" class="button-primary" id="efectivoButton">Pago en efectivo</button>
+  </form>
+  <a class="button-primary" href="{% url 'lista_cursos' %}" >Cancelar</a>
+</div>
+
+<!-- Modal -->
+<div id="confirmModal" class="modal">
+  <div class="modal-content">
+    <p>¿Está seguro de realizar la compra?</p>
+    <div class="modal-buttons">
+      <button class="confirm" id="confirmEfectivo">Aceptar</button>
+      <button class="cancel" id="cancelModal">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Elementos del DOM
+  const efectivoButton = document.getElementById('efectivoButton');
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmEfectivo = document.getElementById('confirmEfectivo');
+  const cancelModal = document.getElementById('cancelModal');
+  const usuarioInput = document.getElementById('usuario');
+  const emailInput = document.getElementById('email');
+  const hiddenUsuarioInput = document.getElementById('hiddenUsuario');
+  const hiddenEmailInput = document.getElementById('hiddenEmail');
+  const efectivoForm = document.getElementById('efectivoForm');
+
+  // Función para guardar la información del usuario en localStorage
+  function saveUserInfo() {
+    localStorage.setItem('usuario', usuarioInput.value);
+    localStorage.setItem('email', emailInput.value);
+  }
+
+  // Actualizar los campos ocultos del formulario con la información del usuario
+  function updateHiddenInputs() {
+    hiddenUsuarioInput.value = usuarioInput.value;
+    hiddenEmailInput.value = emailInput.value;
+  }
+
+  // Cargar la información del usuario desde localStorage si está disponible
+  document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('usuario')) {
+      usuarioInput.value = localStorage.getItem('usuario');
+      hiddenUsuarioInput.value = localStorage.getItem('usuario');
+    }
+    if (localStorage.getItem('email')) {
+      emailInput.value = localStorage.getItem('email');
+      hiddenEmailInput.value = localStorage.getItem('email');
+    }
+  });
+
+  // Mostrar el modal para pago en efectivo
+  efectivoButton.addEventListener('click', () => {
+    saveUserInfo();
+    updateHiddenInputs();
+    confirmModal.style.display = 'block';
+  });
+
+  // Confirmar acción de pago en efectivo
+  confirmEfectivo.addEventListener('click', () => {
+    saveUserInfo();
+    updateHiddenInputs();
+    efectivoForm.submit(); // Enviar el formulario para proceder con el pago en efectivo
+  });
+
+  // Cancelar acción
+  cancelModal.addEventListener('click', () => {
+    confirmModal.style.display = 'none';
+  });
+
+  // Cerrar modal si se hace clic fuera del contenido
+  window.addEventListener('click', (event) => {
+    if (event.target === confirmModal) {
+      confirmModal.style.display = 'none';
+    }
+  });
+</script>
+{% endblock content %}
