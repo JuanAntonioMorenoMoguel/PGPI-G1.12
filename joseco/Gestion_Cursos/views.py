@@ -511,8 +511,10 @@ def mis_recibos(request):
 @login_required
 def mis_cursos(request):
     # Recuperar los cursos del usuario autenticado con recibos en estado 'Pagado'
-    cursos = Recibo.objects.filter(usuario=request.user, estado='Pagado').values_list('curso__id', flat=True)
+    cursos = Recibo.objects.filter(usuario=request.user).values_list('curso__id', flat=True)
     cursos = Curso.objects.filter(id__in=cursos)
+    for curso in cursos:
+        curso.estado = Recibo.objects.filter(usuario=request.user, curso=curso).first().estado
     return render(request, 'mis_cursos.html', {'cursos': cursos})
 
 def ver_recibo(request):

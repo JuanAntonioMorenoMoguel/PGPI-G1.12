@@ -159,6 +159,9 @@
                             <div>
                                 <h5>Introducción a la Justicia Digital</h5>
                                 <p>Explora los fundamentos del derecho en la era digital.</p>
+                                <!--Boton para comprar el curso-->
+                                <button type="button" class="btn btn-success me-2" onclick="reservarCurso({{ 1 }})">Añadir al carrito</button>
+                                    <a href="{% url 'resumen_compra' 1 %}" class="btn btn-primary">Comprar</a>
                             </div>
                         </div>
                     </div>
@@ -174,6 +177,8 @@
                             <div>
                                 <h5>Gestión en el Sistema Sanitario</h5>
                                 <p>Conviértete en un líder en la administración sanitaria.</p>
+                                <button type="button" class="btn btn-success me-2" onclick="reservarCurso({{ 2 }})">Añadir al carrito</button>
+                                    <a href="{% url 'resumen_compra' 2 %}" class="btn btn-primary">Comprar</a>
                             </div>
                         </div>
                     </div>
@@ -189,6 +194,8 @@
                             <div>
                                 <h5>Fundamentos de Programación Educativa</h5>
                                 <p>Aprende a implementar estrategias educativas innovadoras.</p>
+                                <button type="button" class="btn btn-success me-2" onclick="reservarCurso({{ 3 }})">Añadir al carrito</button>
+                                    <a href="{% url 'resumen_compra' 3 %}" class="btn btn-primary">Comprar</a>
                             </div>
                         </div>
                     </div>

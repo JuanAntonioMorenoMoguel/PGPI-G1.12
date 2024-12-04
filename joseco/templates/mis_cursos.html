@@ -20,6 +20,7 @@
                     <th>Fecha Inicio</th>
                     <th>Fecha Finalización</th>
                     <th>Detalles</th>
+                    <th>Estado</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,6 +33,13 @@
                     <td>{{ curso.fecha_finalizacion }}</td>
                     <td>
                         <button class="btn btn-info btn-sm" onclick="toggleDetails('detalles-{{ curso.id }}')">Ver Detalles</button>
+                    </td>
+                    <td>
+                        {% if curso.estado == 'Pagado' %}
+                        <span class="badge bg-success">Pagado</span>
+                        {% else %}
+                        <span class="badge bg-warning text-dark">No pagado</span>
+                        {% endif %}
                     </td>
                 </tr>
                 <tr id="detalles-{{ curso.id }}" class="fila-detalles d-none">
