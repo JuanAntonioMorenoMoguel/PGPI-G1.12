@@ -106,10 +106,9 @@
                 
 
                 <!-- Formulario para buscar recibo -->
-                {% if not user.is_authenticated %}
+                {% if not user.is_superuser %}
                     <form action="{% url 'ver_recibo' %}" method="get" class="d-flex align-items-center">
-                        {% csrf_token %}
-                        <input type="text" name="id_recibo" placeholder="Buscar recibo por ID" class="form-control form-control-sm" style="width: 200px;">
+                        <input type="text" name="codigo_referencia" placeholder="Buscar recibo por ID" class="form-control form-control-sm" style="width: 200px;">
                         <button type="submit" class="btn btn-primary btn-sm ms-2">Buscar Recibo</button>
                     </form>
                 {% endif %}

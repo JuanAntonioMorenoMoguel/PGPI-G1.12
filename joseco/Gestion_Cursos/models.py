@@ -26,3 +26,4 @@ class Recibo(models.Model):
         ],
         default='No Pagado'
     )
+    codigo_referencia = models.CharField(max_length=100, unique=True, null=True, blank=True)

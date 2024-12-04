@@ -19,6 +19,7 @@
                 <th>Método de Pago</th>
                 <th>Fecha de Pago</th>
                 <th>Estado</th>
+                <th>Código de Referencia</th> <!-- Nuevo encabezado -->
                 <th>Acción</th>
             </tr>
         </thead>
@@ -30,6 +31,7 @@
                 <td>{{ recibo.metodo_pago }}</td>
                 <td>{{ recibo.fecha_pago|date:"d/m/Y" }}</td>
                 <td>{{ recibo.estado }}</td>
+                <td>{{ recibo.codigo_referencia }}</td> <!-- Nuevo campo -->
                 <td>
                     {% if recibo.estado == 'No Pagado' %}
                     <form method="post" action="{% url 'cambiar_estado' recibo.id %}" style="display: inline;">
@@ -43,7 +45,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" class="no-recibos">No hay recibos disponibles.</td>
+                <td colspan="7" class="no-recibos">No hay recibos disponibles.</td> <!-- Ajustado para 7 columnas -->
             </tr>
             {% endfor %}
         </tbody>

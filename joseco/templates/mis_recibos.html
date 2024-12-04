@@ -50,7 +50,7 @@
     <div class="text-center mb-4">
         <form action="{% url 'ver_recibo' %}" method="get" class="d-inline-flex align-items-center justify-content-center">
             {% csrf_token %}
-            <input type="text" name="id_recibo" placeholder="Buscar recibo por ID" class="form-control me-2" style="width: 250px;">
+            <input type="text" name="codigo_referencia" placeholder="Buscar recibo por ID" class="form-control me-2" style="width: 250px;">
             <button type="submit" class="btn btn-secondary">Buscar Recibo</button>
         </form>
     </div>
@@ -80,6 +80,8 @@
                 <p><strong>Método de Pago:</strong> {{ recibo.metodo_pago }}</p>
                 <p><strong>Fecha de Pago:</strong> {{ recibo.fecha_pago|date:"d/m/Y H:i" }}</p>
                 <p><strong>Estado:</strong> {{ recibo.get_estado_display }}</p>
+                <p><strong>Código de Referencia:</strong> {{ recibo.codigo_referencia }}</p> <!-- Añadido -->
+
             </div>
             {% endfor %}
             <button class="navigation-btn right" onclick="changeRecibo(1)">&#8250;</button>
@@ -121,27 +123,27 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const inputRecibo = document.querySelector('input[name="id_recibo"]');
-        const messages = document.querySelectorAll('.alert.alert-danger');
+    const inputRecibo = document.querySelector('input[name="codigo_referencia"]');
+    const messages = document.querySelectorAll('.alert.alert-danger');
 
-        if (messages.length > 0 && inputRecibo) {
-            // Agrega la clase de error para cambiar el color del borde
-            inputRecibo.classList.add('input-error');
+    if (messages.length > 0 && inputRecibo) {
+        // Agrega la clase de error para cambiar el color del borde
+        inputRecibo.classList.add('input-error');
 
-            // Agrega la clase para el efecto de vibración
-            inputRecibo.classList.add('shake');
+        // Agrega la clase para el efecto de vibración
+        inputRecibo.classList.add('shake');
 
-            // Remueve el efecto de vibración después de 0.5 segundos
-            setTimeout(() => {
-                inputRecibo.classList.remove('shake');
-            }, 500);
+        // Remueve el efecto de vibración después de 0.5 segundos
+        setTimeout(() => {
+            inputRecibo.classList.remove('shake');
+        }, 500);
 
-            // Remueve el color rojo después de 1.5 segundos
-            setTimeout(() => {
-                inputRecibo.classList.remove('input-error');
-            }, 1500);
-        }
-    });
+        // Remueve el color rojo después de 1.5 segundos
+        setTimeout(() => {
+            inputRecibo.classList.remove('input-error');
+        }, 1500);
+    }
+});
 
 </script>
 {% endblock %}

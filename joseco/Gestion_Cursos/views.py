@@ -12,6 +12,7 @@ from django.conf import settings
 import stripe
 from django.core.serializers.json import DjangoJSONEncoder
 from decimal import Decimal
+import uuid
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -77,7 +78,7 @@ def resumen_compra(request, curso_id):
     # Verificar si el curso cumple las condiciones para excluir gastos de gestión
     cumple_condiciones = (
         curso.duracion_meses() >= 1 and  # Mínimo 1 mes
-        4 <= curso.horas_semanales <= 6 and  # Entre 4 y 6 horas semanales
+        4 <= curso.horas_semanales and  # Entre 4 y 6 horas semanales
         (curso.precio / curso.duracion_meses()) >= 75  # Precio mensual mínimo de 75 €
     )
 
@@ -123,7 +124,8 @@ def create_payment_intent(request):
                 fecha_pago=now(),  # Registrar la fecha actual como fecha de pago
                 importe=amount / 100,  # Convertir el importe a euros
                 metodo_pago='Con Tarjeta', # Definir el método de pago
-                estado='Pagado', # Marcar el recibo como pagado
+                estado='Pagado',
+                codigo_referencia=str(uuid.uuid4()) # Marcar el recibo como pagado
              
             )
 
@@ -159,6 +161,7 @@ def create_payment_intent(request):
             html += f"<p>Especialidad: {curso.especialidad}</p>"
             html += "<br>"
             html += f"<p>Precio Total: {curso.precio} €</p><br>"
+            html += f"<p>Código de referencia: {recibo.codigo_referencia}</p><br>"
             html += "<p>Gracias por tu compra.</p>"
 
             mailer.set_mail_from(mail_from, mail_body)
@@ -191,7 +194,7 @@ def resumen_compras(request):
         # Verificar si todos los cursos cumplen las condiciones
         cumple_condiciones = all(
             curso.duracion_meses() >= 1 and  # Mínimo 1 mes
-            4 <= curso.horas_semanales <= 6 and  # Entre 4 y 6 horas semanales
+            4 <= curso.horas_semanales and  # Entre 4 y 6 horas semanales
             (curso.precio / curso.duracion_meses()) >= 75  # Mínimo 75€/mes
             for curso in cursos
         )
@@ -267,7 +270,8 @@ def create_payment_intents_cursos(request):
                     fecha_pago=now(),
                     importe=curso.precio,
                     metodo_pago="Con Tarjeta",
-                    estado="Pagado"
+                    estado="Pagado",
+                    codigo_referencia=str(uuid.uuid4())
 
                 )
 
@@ -309,7 +313,7 @@ def create_payment_intents_cursos(request):
                 html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
                 html += f"<p>Modalidad: {curso.modalidad}</p>"
                 html += f"<p>Especialidad: {curso.especialidad}</p>"
-                html += "<br>"
+                html += f"<p>Código de referencia: {recibo.codigo_referencia}</p><br>"
             html += f"<p>Precio Total: {sum(curso.precio for curso in cursos)} €</p><br>"
             html += "<p>Gracias por tu compra.</p>"
 
@@ -351,7 +355,8 @@ def pago_efectivo(request, curso_id):
             (curso.precio / curso.duracion_meses()) >= 75
             ) else 0),
             metodo_pago="Efectivo",
-            estado="No Pagado"
+            estado="No Pagado",
+            codigo_referencia=str(uuid.uuid4())
 
         )
     
@@ -386,6 +391,7 @@ def pago_efectivo(request, curso_id):
     html += f"<p>Especialidad: {curso.especialidad}</p>"
     html += "<br>"
     html += f"<p>Precio Total: {curso.precio} €</p><br>"
+    html += f"<p>Código de referencia: {recibo.codigo_referencia}</p><br>"
     html += "<p>Gracias por tu compra.</p>"
 
     mailer.set_mail_from(mail_from, mail_body)
@@ -435,8 +441,8 @@ def pagos_efectivo(request):
                     fecha_pago=now(),
                     importe=curso.precio + gastos_gestion_por_curso,
                     metodo_pago="Efectivo",
-                    estado="No Pagado"
-
+                    estado="No Pagado",
+                    codigo_referencia=str(uuid.uuid4())
                 )
                 Carrito.objects.filter(usuario=request.user, curso=curso).delete()
                 recibos.append(recibo)
@@ -472,7 +478,7 @@ def pagos_efectivo(request):
             html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
             html += f"<p>Modalidad: {curso.modalidad}</p>"
             html += f"<p>Especialidad: {curso.especialidad}</p>"
-            html += "<br>"
+            html += f"<p>Código de referencia: {recibo.codigo_referencia}</p><br>"
         html += f"<p>Precio Total: {sum(curso.precio for curso in cursos)} €</p><br>"
         html += "<p>Gracias por tu compra.</p>"
 
@@ -510,24 +516,16 @@ def mis_cursos(request):
     return render(request, 'mis_cursos.html', {'cursos': cursos})
 
 def ver_recibo(request):
-    id_recibo = request.GET.get('id_recibo', '').strip()
+    codigo_referencia = request.GET.get('codigo_referencia', '').strip()
 
-    # Si el ID está vacío, redirigir de nuevo a la página de "Mis Recibos"
-    if not id_recibo:
+    # Si el código de referencia está vacío, redirigir de nuevo a la página de "Mis Recibos"
+    if not codigo_referencia:
         return redirect('mis_recibos')
 
-    try:
-        # Intentar convertir a entero
-        id_recibo = int(id_recibo)
-    except ValueError:
-        # Si no es un número, mostrar un mensaje de error y redirigir
-        messages.error(request, "El ID del recibo debe ser un número.")
-        return redirect('mis_recibos')
-
-    # Buscar el recibo o mostrar error si no existe
-    recibo = Recibo.objects.filter(id=id_recibo).first()
+    # Buscar el recibo por código de referencia o mostrar error si no existe
+    recibo = Recibo.objects.filter(codigo_referencia=codigo_referencia).first()
     if not recibo:
-        messages.error(request, f"No existe ningún recibo con el ID {id_recibo}.")
+        messages.error(request, f"No existe ningún recibo con el código de referencia '{codigo_referencia}'.")
         return redirect('mis_recibos')
 
     # Si se encuentra el recibo, mostrar la plantilla con la información del recibo
