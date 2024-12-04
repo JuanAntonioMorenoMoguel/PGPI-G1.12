@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cursos.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="titulo text-center mb-4">Cesta de la Compra</h1>
+
+    {% if carrito %}
+    <form method="post" action="{% url 'resumen_compras_no_auth' %}">
+        {% csrf_token %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark">
+                    <tr class="text-center">
+                        <th scope="col">Seleccionar</th>
+                        <th scope="col">Nombre del Curso</th>
+                        <th scope="col">Cantidad</th>
+                        <th scope="col">Precio</th>
+                        <th scope="col">Eliminar Curso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in carrito %}
+                    <tr>
+                        <td class="text-center">
+                            <input type="checkbox" name="cursos_seleccionados" value="{{ item.curso.id }}">
+                        </td>
+                        <td>{{ item.curso.nombre }}</td>
+                        <td class="text-center">{{ item.cantidad }}</td>
+                        <td class="text-center">{{ item.curso.precio }} €</td>
+                        <td class="text-center">
+                        <a href="{% url 'eliminar_de_carrito_no_auth' item.curso.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">Reservar cursos seleccionados</button>
+        </div>
+    </form>
+    {% else %}
+    <p class="text-center text-muted">No tienes cursos en la cesta actualmente.</p>
+    {% endif %}
+</div>
+{% endblock content %}

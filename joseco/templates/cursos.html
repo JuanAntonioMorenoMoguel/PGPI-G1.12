@@ -5,9 +5,6 @@
 <link rel="stylesheet" href="{% static 'css/cursos.css' %}">
 {% endblock extra_css %}
 
-
-
-
 {% block content %}
 <h1 class="titulo text-center">Lista de Cursos</h1>
 
@@ -57,7 +54,6 @@
 </div>
 {% endif %}
 
-
 <!-- Lista de cursos -->
 <div class="container">
     {% if cursos %}
@@ -87,26 +83,42 @@
 
                     <!-- Acciones del curso -->
                     <div class="curso-acciones mt-3">
-                        {% if not user.is_superuser %}
-                            <form method="post" action="{% url 'agregar_a_carrito' curso.id %}" class="form-reserva" data-curso-id="{{ curso.id }}">
-                                {% csrf_token %}
-                                {% if curso.vacantes > 0 and curso.id not in carrito and curso.id not in recibos %}
-                                    <button type="button" class="btn btn-success me-2" onclick="reservarCurso({{ curso.id }})">Añadir al carrito</button>
-                                    <a href="{% url 'resumen_compra' curso.id %}" class="btn btn-primary">Comprar</a>
-                                {% elif curso.id in carrito %}
-                                    <button type="button" class="btn btn-secondary" disabled>Ya está en el carrito</button>
-                                {% elif curso.id in recibos %}
-                                    <button type="button" class="btn btn-secondary" disabled>Ya reservado</button>
-                                {% elif curso.vacantes == 0 %}
-                                    <button type="button" class="btn btn-secondary" disabled>Sin plazas</button>
-                                {% endif %}
-                            </form>
+                        {% if user.is_authenticated %}
+                            {% if not user.is_superuser %}
+                                <form method="post" action="{% url 'agregar_a_carrito' curso.id %}" class="form-reserva" data-curso-id="{{ curso.id }}">
+                                    {% csrf_token %}
+                                    {% if curso.vacantes > 0 and curso.id not in carrito and curso.id not in recibos %}
+                                        <button type="button" class="btn btn-success me-2" onclick="reservarCurso({{ curso.id }})">Añadir al carrito</button>
+                                        <a href="{% url 'resumen_compra' curso.id %}" class="btn btn-primary">Comprar</a>
+                                    {% elif curso.id in carrito %}
+                                        <button type="button" class="btn btn-secondary" disabled>Ya está en el carrito</button>
+                                    {% elif curso.id in recibos %}
+                                        <button type="button" class="btn btn-secondary" disabled>Ya reservado</button>
+                                    {% elif curso.vacantes == 0 %}
+                                        <button type="button" class="btn btn-secondary" disabled>Sin plazas</button>
+                                    {% endif %}
+                                </form>
+                            {% else %}
+                                <a href="{% url 'editar_curso' curso.id %}" class="btn btn-warning me-2">Editar</a>
+                                <form method="post" action="{% url 'eliminar_curso' curso.id %}" class="form-eliminar d-inline" onsubmit="return confirm('¿Eliminar este curso?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                </form>
+                            {% endif %}
                         {% else %}
-                            <a href="{% url 'editar_curso' curso.id %}" class="btn btn-warning me-2">Editar</a>
-                            <form method="post" action="{% url 'eliminar_curso' curso.id %}" class="form-eliminar d-inline" onsubmit="return confirm('¿Eliminar este curso?');">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger">Eliminar</button>
-                            </form>
+                        <form method="post" action="{% url 'agregar_a_carrito_no_auth' curso.id %}" class="form-reserva" data-curso-id="{{ curso.id }}">
+                            {% csrf_token %}
+                            {% if curso.vacantes > 0 and curso.id not in carrito and curso.id not in recibos %}
+                                <button type="button" class="btn btn-success me-2" onclick="reservarCursoNoAuth({{ curso.id }})">Añadir al carrito</button>
+                                <a href="{% url 'resumen_compra_no_auth' curso.id %}" class="btn btn-primary">Comprar</a>
+                            {% elif curso.id in carrito %}
+                                <button type="button" class="btn btn-secondary" disabled>Ya está en el carrito</button>
+                            {% elif curso.id in recibos %}
+                                <button type="button" class="btn btn-secondary" disabled>Ya reservado</button>
+                            {% elif curso.vacantes == 0 %}
+                                <button type="button" class="btn btn-secondary" disabled>Sin plazas</button>
+                            {% endif %}
+                        </form>
                         {% endif %}
                     </div>
                 </div>
@@ -126,8 +138,6 @@
         <p class="no-cursos text-center">No hay cursos disponibles.</p>
     {% endif %}
 </div>
-
-
 
 <script>
     function reservarCurso(cursoId) {
@@ -150,11 +160,34 @@
             if (carritoCantidad) {
                 carritoCantidad.textContent = data.carrito_cantidad;
             }
-            location.reload();
+            
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function reservarCursoNoAuth(cursoId) {
+        const url = `/agregar-a-carrito-no-auth/${cursoId}/`;
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+            }
+            const carritoCantidad = document.getElementById('carrito-cantidad');
+            if (carritoCantidad) {
+                carritoCantidad.textContent = data.carrito_cantidad;
+            }
+            
         })
         .catch(error => console.error('Error:', error));
     }
 </script>
 {% endblock content %}
-
-

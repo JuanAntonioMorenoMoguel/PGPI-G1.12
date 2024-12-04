@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/payment.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="payment-card">
+        <h2>Pagar curso: {{ curso.nombre }}</h2>
+        <p>Precio: <strong>{{ curso.precio }} €</strong></p>
+
+        <!-- Formulario de datos de usuario y tarjeta -->
+        <form id="payment-form">
+            <!-- Nombre y apellidos -->
+            <input type="text" id="nombre" name="nombre" placeholder="Nombre Completo" class="form-control mb-2" required>
+            <input type="email" id="email" name="email" placeholder="Correo Electrónico" class="form-control mb-2" required>
+
+            <!-- Stripe Elements para tarjeta -->
+            <div id="card-element" class="form-control mb-3"></div>
+            
+            <!-- Botón de pago -->
+            <button type="submit" id="submit" class="submit-button">Pagar</button>
+        </form>
+        
+        <!-- Mensaje de error/success -->
+        <div id="payment-message" class="hidden"></div>
+        <a class="button-primary" href="{% url 'resumen_compra_no_auth' curso.id %}">Cancelar</a>
+    </div>
+</div>
+
+<!-- Script de Stripe -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    // Función para obtener el token CSRF de las cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken'); // Obtener el token CSRF
+
+    // Inicializar Stripe
+    const stripe = Stripe('{{ stripe_public_key }}');
+    const elements = stripe.elements();
+
+    // Crear el campo de tarjeta
+    const cardElement = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '16px',
+                color: '#32325d',
+            },
+        },
+        hidePostalCode: true // Ocultar el código postal
+    });
+
+    cardElement.mount('#card-element'); // Montar el campo de tarjeta
+
+    // Manejo del formulario
+    const form = document.getElementById('payment-form');
+    const messageDiv = document.getElementById('payment-message');
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        // Obtener los datos del formulario
+        const nombre = document.getElementById('nombre').value.trim();
+        const email = document.getElementById('email').value.trim();
+
+        if (!nombre || !email) {
+        messageDiv.classList.remove('hidden');
+        messageDiv.innerText = 'Por favor, ingrese su nombre completo y correo electrónico.';
+        messageDiv.style.color = 'red';
+        return;
+    }
+
+        const cursoId = {{ curso.id }}; // ID del curso desde el backend
+        const precioCurso = parseFloat("{{ curso.precio|floatformat:2 }}");
+
+        try {
+            console.log("Formulario enviado");
+
+            // Enviar la solicitud al backend
+            const response = await fetch('/create-payment-intent-no-auth/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    amount: precioCurso * 100, // Convertir el precio a céntimos
+                    nombre: nombre, // Enviar el nombre del usuario
+                    email: email, // Enviar el email del usuario
+                    curso_id: cursoId // Enviar el ID del curso
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Error en la solicitud');
+            }
+
+            console.log("Respuesta del servidor:", data);
+
+            // Confirmar el pago con Stripe
+            const { error } = await stripe.confirmCardPayment(data.clientSecret, {
+                payment_method: {
+                    card: cardElement
+                }
+            });
+
+            if (error) {
+                messageDiv.classList.remove('hidden');
+                messageDiv.innerText = error.message;
+                messageDiv.style.color = 'red';
+            } else {
+                messageDiv.classList.remove('hidden');
+                messageDiv.innerText = 'Pago completado con éxito.';
+                messageDiv.style.color = 'green';
+
+                // Redirigir al recibo
+                window.location.href = ``;
+            }
+        } catch (err) {
+            console.error('Error en la solicitud:', err);
+            messageDiv.classList.remove('hidden');
+            messageDiv.innerText = err.message || 'Ocurrió un error';
+            messageDiv.style.color = 'red';
+        }
+    });
+</script>
+{% endblock %}

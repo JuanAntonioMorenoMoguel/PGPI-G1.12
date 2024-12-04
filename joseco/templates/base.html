@@ -83,10 +83,13 @@
                 {% if user.is_authenticated %}
                     {% if user.is_staff %}
                         <!-- Opciones para staff (si aplica) -->
-                    {% else %}
+                    {% elif not user.is_superuser %}
                         <a class="nav-link" href="{% url 'mis_cursos' %}">Mis Cursos</a>
                         <a class="nav-link" href="{% url 'mis_recibos' %}">Mis Recibos</a>
                         <a class="nav-link" href="{% url 'lista_cursos' %}">Cursos Disponibles</a>
+                        <a href="{% url 'ver_carrito' %}" class="nav-link d-flex align-items-center">
+                            🛒 Ver Cesta <span id="carrito-cantidad" class="ms-1">0</span>
+                        </a>
                     {% endif %}
                     <a class="nav-link" href="{% url 'perfil' %}">{{ user.email }}</a>
                     <a class="nav-link" href="{% url 'contacto' %}">Contáctanos</a>
@@ -97,20 +100,27 @@
                 {% else %}
                     <a href="{% url 'inicio_sesion' %}" class="btn btn-secondary">Acceso</a>
                     <a class="nav-link" href="{% url 'contacto' %}">Contáctanos</a>
-                {% endif %}
-                {% if not user.is_superuser %}
-                <a href="{% url 'ver_carrito' %}" class="nav-link d-flex align-items-center">
-                    🛒 Ver Cesta <span id="carrito-cantidad" class="ms-1">0</span>
-                </a>
+                    <a href="{% url 'ver_carrito_no_auth' %}" class="nav-link d-flex align-items-center">
+                        🛒 Ver Cesta <span id="carrito-cantidad" class="ms-1">0</span>
+                    </a>
                 {% endif %}
                 
 
                 <!-- Formulario para buscar recibo -->
                 {% if not user.is_superuser %}
-                    <form action="{% url 'ver_recibo' %}" method="get" class="d-flex align-items-center">
-                        <input type="text" name="codigo_referencia" placeholder="Buscar recibo por ID" class="form-control form-control-sm" style="width: 200px;">
-                        <button type="submit" class="btn btn-primary btn-sm ms-2">Buscar Recibo</button>
-                    </form>
+                    {% if user.is_authenticated %}
+                        <!-- Buscar recibo para usuarios autenticados -->
+                        <form action="{% url 'ver_recibo' %}" method="get" class="d-flex align-items-center">
+                            <input type="text" name="codigo_referencia" placeholder="Buscar recibo por ID" class="form-control form-control-sm" style="width: 200px;">
+                            <button type="submit" class="btn btn-primary btn-sm ms-2">Buscar Recibo</button>
+                        </form>
+                    {% else %}
+                        <!-- Buscar recibo para usuarios no autenticados -->
+                        <form action="{% url 'ver_recibo_no_auth' %}" method="get" class="d-flex align-items-center">
+                            <input type="text" name="codigo_referencia" placeholder="Buscar recibo por ID" class="form-control form-control-sm" style="width: 200px;">
+                            <button type="submit" class="btn btn-primary btn-sm ms-2">Buscar Recibo</button>
+                        </form>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>

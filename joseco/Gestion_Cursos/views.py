@@ -5,7 +5,7 @@ from django.shortcuts import get_list_or_404, render, redirect, get_object_or_40
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from .models import Curso, Carrito, Recibo
+from .models import Curso, Carrito, Recibo, CarritoNoAuth, ReciboNoAuth
 from .filters import CursoFilter
 from django.utils.timezone import now
 from django.conf import settings
@@ -39,7 +39,22 @@ def agregar_a_carrito(request, curso_id):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # Comprobar si es AJAX
         return JsonResponse({"message": "Curso añadido al carrito", "carrito_cantidad": Carrito.objects.filter(usuario=request.user).count()})
     
-    return redirect('ver_carrito')  # Redirección si no es AJAX
+    return redirect('ver_carrito')
+
+@csrf_exempt
+def agregar_a_carrito_no_auth(request, curso_id):
+    curso = get_object_or_404(Curso, id=curso_id)
+    
+    carrito, created = CarritoNoAuth.objects.get_or_create(curso=curso)
+    if not created:
+        carrito.cantidad += 1
+        carrito.save()
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # Comprobar si es AJAX
+        return JsonResponse({"message": "Curso añadido al carrito", "carrito_cantidad": CarritoNoAuth.objects.count()})
+        
+    return redirect('ver_carrito_no_auth')
+ # Redirección si no es AJAX
 
 @login_required
 def eliminar_de_carrito(request, curso_id):
@@ -47,10 +62,19 @@ def eliminar_de_carrito(request, curso_id):
     item.delete()
     return redirect('ver_carrito')
 
+def eliminar_de_carrito_no_auth(requests, curso_id):
+    item = get_object_or_404(CarritoNoAuth, curso=curso_id)
+    item.delete()
+    return redirect('ver_carrito_no_auth')
+
 @login_required
 def ver_carrito(request):
     carrito = Carrito.objects.filter(usuario=request.user)
     return render(request, 'ver_carrito.html', {'carrito': carrito})
+
+def ver_carrito_no_auth(request):
+    carrito = CarritoNoAuth.objects.all()
+    return render(request, 'ver_carrito_no_auth.html', {'carrito': carrito})
 
 @login_required
 def confirmar_reserva(request):
@@ -67,6 +91,12 @@ def confirmar_reserva(request):
 def carrito_cantidad(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         cantidad = Carrito.objects.filter(usuario=request.user).count()
+        return JsonResponse({"carrito_cantidad": cantidad})
+    return JsonResponse({"error": "Acceso no permitido"}, status=403)
+
+def carrito_cantidad_no_auth(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        cantidad = CarritoNoAuth.objects.count()
         return JsonResponse({"carrito_cantidad": cantidad})
     return JsonResponse({"error": "Acceso no permitido"}, status=403)
 
@@ -90,10 +120,133 @@ def resumen_compra(request, curso_id):
 
     # Renderizar la plantilla con los datos
     return render(request, 'resumen_compra.html', {
-        'curso': curso,
+        'curso': curso,     
         'gastos_gestion': gastos_gestion,
         'total_precio': total_precio
     })
+
+# Vista para resumen de compra sin autenticación
+def resumen_compra_no_auth(request, curso_id):
+    # Obtener el curso por ID
+    curso = get_object_or_404(Curso, id=curso_id)
+
+    # Obtener los datos del usuario desde la solicitud (en caso de ser una solicitud POST)
+    nombre = request.POST.get('nombre')
+    email = request.POST.get('email')
+
+
+    # Verificar si el curso cumple las condiciones para excluir gastos de gestión
+    cumple_condiciones = (
+        curso.duracion_meses() >= 1 and  # Mínimo 1 mes
+        4 <= curso.horas_semanales and  # Entre 4 y 6 horas semanales
+        (curso.precio / curso.duracion_meses()) >= 75  # Precio mensual mínimo de 75 €
+    )
+
+    # Calcular los gastos de gestión
+    gastos_gestion = Decimal('0.00') if cumple_condiciones else Decimal('10.00')
+
+    # Calcular el precio total
+    total_precio = curso.precio + gastos_gestion
+
+    # Renderizar la plantilla con los datos
+    return render(request, 'resumen_compra_no_auth.html', {
+        'curso': curso,
+        'gastos_gestion': gastos_gestion,
+        'total_precio': total_precio,
+        'nombre': nombre,
+        'email': email
+    })
+
+@csrf_exempt
+def create_payment_intent_no_auth(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        amount = data.get('amount', 0)
+        nombre = data.get('nombre')
+        email = data.get('email')
+
+        print("Datos recibidos:", data)
+        if not nombre or not email:
+            return JsonResponse({'error': 'Nombre y correo electrónico son obligatorios.'}, status=400)
+
+
+        try:
+            # Obtener el curso por ID
+            curso = get_object_or_404(Curso, id=data.get('curso_id'))
+            
+            # Crear el Payment Intent en Stripe
+            intent = stripe.PaymentIntent.create(
+                amount=amount,
+                currency='eur',
+                payment_method_types=['card']
+            )
+
+            # Crear el recibo asociado utilizando ReciboNoAuth
+            recibo = ReciboNoAuth.objects.create(
+                curso=curso,  # Relacionar el curso
+                nombre=nombre,  # Guardar el nombre del usuario ingresado
+                email=email,  # Guardar el email ingresado
+                fecha_pago=now(),  # Registrar la fecha actual como fecha de pago
+                importe=amount / 100,  # Convertir el importe a euros
+                metodo_pago='Con Tarjeta',  # Definir el método de pago
+                estado='Pagado',
+                codigo_referencia=str(uuid.uuid4())  # Generar un código de referencia único
+            )
+
+            # Configurar MailerSend
+            api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+            mailer = emails.NewEmail(api_key)
+
+            # Crear el cuerpo del correo
+            mail_body = {}
+
+            mail_from = {
+                "name": "MS_dPjZxa",
+                "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+            }
+
+            recipients = [
+                {
+                    "name": nombre,
+                    "email": email,
+                }
+            ]
+
+            subject = "Confirmación de compra de cursos"
+            text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
+            html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
+
+            html += f"<h2>{curso.nombre}</h2>"
+            html += f"<p>Precio: {curso.precio} €</p>"
+            html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
+            html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
+            html += f"<p>Modalidad: {curso.modalidad}</p>"
+            html += f"<p>Especialidad: {curso.especialidad}</p>"
+            html += "<br>"
+            html += f"<p>Precio Total: {curso.precio} €</p><br>"
+            html += f"<p>Código de referencia: {recibo.codigo_referencia}</p><br>"
+            html += "<p>Gracias por tu compra.</p>"
+
+            mailer.set_mail_from(mail_from, mail_body)
+            mailer.set_mail_to(recipients, mail_body)
+            mailer.set_subject(subject, mail_body)
+            mailer.set_html_content(html, mail_body)
+            mailer.set_plaintext_content(text, mail_body)
+
+            # Enviar el correo electrónico
+            mailer.send(mail_body)
+
+            print("Datos recibidos:", recibo.codigo_referencia)
+
+            # Respuesta JSON con el client secret y recibo_id
+            return JsonResponse({'clientSecret': intent['client_secret'], 'recibo_id': recibo.id})
+        
+            
+
+        
+        except Exception as e:
+            # En caso de error, devolver un mensaje de error en formato JSON
+            return JsonResponse({'error': str(e)}, status=400)
 
 def datos_pago(request, curso_id):
     curso = get_object_or_404(Curso, id=curso_id)  # Busca el curso por su ID
@@ -102,6 +255,15 @@ def datos_pago(request, curso_id):
         'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
     }
     return render(request, 'datos_pago.html', context)
+
+def datos_pago_no_auth(request, curso_id):
+    curso = get_object_or_404(Curso, id=curso_id)  # Busca el curso por su ID
+    context = {
+        'curso': curso,
+        'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
+    }
+    return render(request, 'datos_pago_no_auth.html', context)
+
 
 def create_payment_intent(request):
     if request.method == 'POST':
@@ -216,6 +378,49 @@ def resumen_compras(request):
     else:
         return redirect('ver_carrito')
     
+@csrf_exempt
+def resumen_compras_no_auth(request):
+    if request.method == 'POST':
+        cursos_ids = request.POST.getlist('cursos_seleccionados')
+        if not cursos_ids:
+            messages.error(request, "Debes seleccionar al menos un curso.")
+            return redirect('ver_carrito_no_auth')
+
+        # Filtrar los cursos seleccionados
+        cursos = Curso.objects.filter(id__in=cursos_ids)
+
+        # Calcular el precio total de los cursos
+        total_precio_cursos = sum(curso.calcular_precio_final() for curso in cursos)
+
+        # Verificar si todos los cursos cumplen las condiciones
+        cumple_condiciones = all(
+            curso.duracion_meses() >= 1 and  # Mínimo 1 mes
+            4 <= curso.horas_semanales and  # Entre 4 y 6 horas semanales
+            (curso.precio / curso.duracion_meses()) >= 75  # Mínimo 75€/mes
+            for curso in cursos
+        )
+
+        # Añadir un único gasto de gestión si algún curso no cumple las condiciones
+        gastos_gestion = Decimal('10.00') if not cumple_condiciones else Decimal('0.00')
+
+        # Calcular el total
+        total_precio = total_precio_cursos + gastos_gestion
+
+        nombre = request.POST.get('nombre')
+        email = request.POST.get('email')
+
+        # Renderizar la plantilla con los datos
+        return render(request, 'resumen_compras_no_auth.html', {
+            'cursos': cursos,
+            'total_precio_cursos': total_precio_cursos,
+            'gastos_gestion': gastos_gestion,
+            'total_precio': total_precio,
+            'nombre': nombre,
+            'email': email
+        })
+    else:
+        return redirect('ver_carrito_no_auth')
+    
 @login_required
 def datos_pago_cursos(request):
     if request.method == 'POST':
@@ -238,6 +443,41 @@ def datos_pago_cursos(request):
         }
         return render(request, 'datos_pago_cursos.html', context)
     return redirect('ver_carrito')
+
+@csrf_exempt
+def datos_pago_cursos_no_auth(request):
+    if request.method == 'POST':
+        curso_ids = request.POST.getlist('cursos_seleccionados')
+        cursos = Curso.objects.filter(id__in=curso_ids)
+
+        if not cursos.exists():
+            messages.error(request, "No se encontraron los cursos seleccionados.")
+            return redirect('ver_carrito_no_auth')
+
+        # Obtener los datos del usuario desde la solicitud POST o localStorage
+        nombre = request.POST.get('nombre')
+        email = request.POST.get('email')
+
+        if not nombre or not email:
+            messages.error(request, "Es necesario ingresar nombre y correo electrónico.")
+            return redirect('resumen_compras_no_auth')
+
+        # Calcular el costo total de los cursos seleccionados
+        costo_total = sum(curso.precio for curso in cursos)
+
+        context = {
+            'cursos': cursos,
+            'costo_total': costo_total,
+            'nombre': nombre,
+            'email': email,
+            'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
+            'cursos_json': json.dumps(
+                list(cursos.values('id', 'nombre', 'precio')),
+                cls=DjangoJSONEncoder
+            )  # Serializar los cursos para usarlos en JS
+        }
+        return render(request, 'datos_pago_cursos_no_auth.html', context)
+    return redirect('ver_carrito_no_auth')
 
 @login_required
 def create_payment_intents_cursos(request):
@@ -334,6 +574,108 @@ def create_payment_intents_cursos(request):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
+@csrf_exempt
+def create_payment_intents_cursos_no_auth(request):
+    if request.method == 'POST':
+        try:
+            # Decodificar el cuerpo de la solicitud
+            data = json.loads(request.body)
+            curso_ids = data.get('curso_ids', [])
+            nombre = data.get('nombre')
+            email = data.get('email')
+
+            if not curso_ids:
+                return JsonResponse({'error': "No se seleccionaron cursos para procesar el pago."}, status=400)
+            
+            if not nombre or not email:
+                return JsonResponse({'error': "El nombre y el correo electrónico son obligatorios."}, status=400)
+
+            # Obtener los cursos seleccionados
+            cursos = Curso.objects.filter(id__in=curso_ids)
+            if not cursos.exists():
+                return JsonResponse({'error': "No se encontraron los cursos seleccionados."}, status=404)
+
+            # Crear recibos y PaymentIntent para cada curso
+            recibos = []
+            for curso in cursos:
+                amount = int(curso.precio * 100)  # Precio en céntimos para Stripe
+                intent = stripe.PaymentIntent.create(
+                    amount=amount,
+                    currency='eur',
+                    payment_method_types=['card']
+                )
+                recibo = ReciboNoAuth.objects.create(
+                    curso=curso,
+                    nombre=nombre,
+                    email=email,
+                    fecha_pago=now(),
+                    importe=curso.precio,
+                    metodo_pago="Con Tarjeta",
+                    estado="Pagado",
+                    codigo_referencia=str(uuid.uuid4())
+                )
+
+                # Reducir el número de vacantes del curso
+                if curso.vacantes > 0:
+                    curso.vacantes -= 1
+                    curso.save()
+
+                recibos.append({
+                    'recibo_id': recibo.id,
+                    'client_secret': intent['client_secret'],  # Stripe client_secret para cada curso
+                })
+
+            # Configurar MailerSend
+            api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+            mailer = emails.NewEmail(api_key)
+
+            # Crear el cuerpo del correo
+            mail_body = {}
+
+            mail_from = {
+                "name": "MS_dPjZxa",
+                "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+            }
+
+            recipients = [
+                {
+                    "name": nombre,
+                    "email": email,
+                }
+            ]
+
+            subject = "Confirmación de compra de cursos"
+            text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
+            html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
+
+            for curso in cursos:
+                html += f"<h2>{curso.nombre}</h2>"
+                html += f"<p>Precio: {curso.precio} €</p>"
+                html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
+                html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
+                html += f"<p>Modalidad: {curso.modalidad}</p>"
+                html += f"<p>Especialidad: {curso.especialidad}</p>"
+                html += f"<p>Código de referencia: {recibo.codigo_referencia}</p><br>"
+            html += f"<p>Precio Total: {sum(curso.precio for curso in cursos)} €</p><br>"
+            html += "<p>Gracias por tu compra.</p>"
+
+            mailer.set_mail_from(mail_from, mail_body)
+            mailer.set_mail_to(recipients, mail_body)
+            mailer.set_subject(subject, mail_body)
+            mailer.set_html_content(html, mail_body)
+            mailer.set_plaintext_content(text, mail_body)
+
+            # Enviar el correo electrónico
+            mailer.send(mail_body)
+
+            return JsonResponse({'recibos': recibos})
+
+        except stripe.error.StripeError as e:
+            return JsonResponse({'error': f"Error de Stripe: {e.user_message}"}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
         
 
 @login_required
@@ -351,7 +693,7 @@ def pago_efectivo(request, curso_id):
             fecha_pago=now(),
             importe=curso.precio + (10 if not (
             curso.duracion_meses() >= 1 and
-            4 <= curso.horas_semanales <= 6 and
+            4 <= curso.horas_semanales and
             (curso.precio / curso.duracion_meses()) >= 75
             ) else 0),
             metodo_pago="Efectivo",
@@ -405,6 +747,95 @@ def pago_efectivo(request, curso_id):
 
     return redirect('recibo', recibo_id=recibo.id)
 
+@csrf_exempt
+def pago_efectivo_no_auth(request, curso_id):
+    if request.method == 'POST':
+        # Obtener el curso por ID
+        curso = get_object_or_404(Curso, id=curso_id)
+
+        # Obtener los datos del usuario desde la solicitud POST
+        nombre = request.POST.get('nombre')
+        email = request.POST.get('email')
+
+        # Validar que el nombre y el email hayan sido ingresados
+        if not nombre or not email:
+            return JsonResponse({'error': 'Nombre y correo electrónico son obligatorios.'}, status=400)
+
+        # Verificar si hay vacantes disponibles para el curso
+        if curso.vacantes >= 1:
+            curso.vacantes -= 1
+            curso.save()
+
+        # Calcular los gastos de gestión según las condiciones del curso
+        gastos_gestion = Decimal('0.00') if (
+            curso.duracion_meses() >= 1 and
+            4 <= curso.horas_semanales and
+            (curso.precio / curso.duracion_meses()) >= 75
+        ) else Decimal('10.00')
+
+        # Calcular el precio total del curso
+        total_precio = curso.precio + gastos_gestion
+
+        # Crear el recibo para usuarios no autenticados
+        recibo = ReciboNoAuth.objects.create(
+            curso=curso,
+            nombre=nombre,
+            email=email,
+            fecha_pago=now(),
+            importe=total_precio,
+            metodo_pago="Efectivo",
+            estado="No Pagado",
+            codigo_referencia=str(uuid.uuid4())
+        )
+
+        # Configurar MailerSend para enviar la confirmación por correo electrónico
+        api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+        mailer = emails.NewEmail(api_key)
+
+        # Crear el cuerpo del correo
+        mail_body = {}
+
+        mail_from = {
+            "name": "MS_dPjZxa",
+            "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+        }
+
+        recipients = [
+            {
+                "name": nombre,
+                "email": email,
+            }
+        ]
+
+        subject = "Confirmación de compra de cursos"
+        text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
+        html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
+
+        html += f"<h2>{curso.nombre}</h2>"
+        html += f"<p>Precio: {curso.precio} €</p>"
+        html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
+        html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
+        html += f"<p>Modalidad: {curso.modalidad}</p>"
+        html += f"<p>Especialidad: {curso.especialidad}</p>"
+        html += "<br>"
+        html += f"<p>Precio Total: {total_precio} €</p><br>"
+        html += f"<p>Código de referencia: {recibo.codigo_referencia}</p><br>"
+        html += "<p>Gracias por tu compra.</p>"
+
+        mailer.set_mail_from(mail_from, mail_body)
+        mailer.set_mail_to(recipients, mail_body)
+        mailer.set_subject(subject, mail_body)
+        mailer.set_html_content(html, mail_body)
+        mailer.set_plaintext_content(text, mail_body)
+
+        # Enviar el correo electrónico
+        mailer.send(mail_body)
+
+        # Redirigir al recibo creado
+        return redirect('index')
+
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 @login_required
 def pagos_efectivo(request):
     if request.method == 'POST':
@@ -421,7 +852,7 @@ def pagos_efectivo(request):
         gastos_gestion_totales = Decimal('10.00') if any(
         not (
             curso.duracion_meses() >= 1 and
-            4 <= curso.horas_semanales <= 6 and
+            4 <= curso.horas_semanales and
             (curso.precio / curso.duracion_meses()) >= 75
         ) for curso in cursos
         ) else Decimal('0.00')
@@ -497,6 +928,103 @@ def pagos_efectivo(request):
     # Si no es POST, redirigir al carrito
     return redirect('ver_carrito')
 
+@csrf_exempt
+def pagos_efectivo_no_auth(request):
+    if request.method == 'POST':
+        # Obtener los IDs de los cursos seleccionados desde el formulario
+        cursos_ids = request.POST.getlist('cursos_seleccionados')
+        nombre = request.POST.get('nombre')
+        email = request.POST.get('email')
+
+        # Validar que se hayan ingresado todos los datos necesarios
+        if not cursos_ids or not nombre or not email:
+            return JsonResponse({'error': 'Debe proporcionar todos los datos requeridos (cursos, nombre y correo electrónico).'}, status=400)
+
+        # Obtener los cursos correspondientes
+        cursos = get_list_or_404(Curso, id__in=cursos_ids)
+
+        n = len(cursos)
+        gastos_gestion_totales = Decimal('10.00') if any(
+            not (
+                curso.duracion_meses() >= 1 and
+                4 <= curso.horas_semanales and
+                (curso.precio / curso.duracion_meses()) >= 75
+            ) for curso in cursos
+        ) else Decimal('0.00')
+
+        gastos_gestion_por_curso = gastos_gestion_totales / n if n > 0 else 0
+
+        recibos = []
+        for curso in cursos:
+            if curso.vacantes >= 1:
+                curso.vacantes -= 1
+                curso.save()
+
+                # Crear un recibo para cada curso
+                recibo = ReciboNoAuth.objects.create(
+                    nombre=nombre,
+                    email=email,
+                    curso=curso,
+                    fecha_pago=now(),
+                    importe=curso.precio + gastos_gestion_por_curso,
+                    metodo_pago="Efectivo",
+                    estado="No Pagado",
+                    codigo_referencia=str(uuid.uuid4())
+                )
+                # Eliminar del carrito no autenticado
+                CarritoNoAuth.objects.filter(curso=curso).delete()
+                recibos.append(recibo)
+
+        # Configurar MailerSend
+        api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+        mailer = emails.NewEmail(api_key)
+
+        # Crear el cuerpo del correo
+        mail_body = {}
+
+        mail_from = {
+            "name": "MS_dPjZxa",
+            "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+        }
+
+        recipients = [
+            {
+                "name": nombre,
+                "email": email,
+            }
+        ]
+
+        subject = "Confirmación de compra de cursos"
+        text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
+        html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
+
+        for recibo in recibos:
+            curso = recibo.curso
+            html += f"<h2>{curso.nombre}</h2>"
+            html += f"<p>Precio: {curso.precio} €</p>"
+            html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
+            html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
+            html += f"<p>Modalidad: {curso.modalidad}</p>"
+            html += f"<p>Especialidad: {curso.especialidad}</p>"
+            html += f"<p>Código de referencia: {recibo.codigo_referencia}</p><br>"
+        html += f"<p>Precio Total: {sum(curso.precio for curso in cursos) + gastos_gestion_totales} €</p><br>"
+        html += "<p>Gracias por tu compra.</p>"
+
+        mailer.set_mail_from(mail_from, mail_body)
+        mailer.set_mail_to(recipients, mail_body)
+        mailer.set_subject(subject, mail_body)
+        mailer.set_html_content(html, mail_body)
+        mailer.set_plaintext_content(text, mail_body)
+
+        # Enviar el correo electrónico
+        mailer.send(mail_body)
+
+        # Redirigir siempre a la página de 'recibos no autenticados'
+        return redirect('index')
+
+    # Si no es POST, redirigir al carrito no autenticado
+    return redirect('ver_carrito_no_auth')
+
 @login_required
 def recibo(request, recibo_id):
     recibo_obj = get_object_or_404(Recibo, id=recibo_id)
@@ -532,3 +1060,18 @@ def ver_recibo(request):
 
     # Si se encuentra el recibo, mostrar la plantilla con la información del recibo
     return render(request, 'recibo.html', {'recibo': recibo})
+
+def ver_recibo_no_auth(request):
+    codigo_referencia = request.GET.get('codigo_referencia', '').strip()
+
+    # Si el código de referencia está vacío, redirigir de nuevo a la página de "Mis Recibos"
+    if not codigo_referencia:
+        return redirect('index')
+
+    # Buscar el recibo por código de referencia o mostrar error si no existe
+    recibo = ReciboNoAuth.objects.filter(codigo_referencia=codigo_referencia).first()
+    if not recibo:
+        messages.error(request, f"No existe ningún recibo con el código de referencia '{codigo_referencia}'.")
+        return redirect('index')
+
+    return render(request, 'recibo_no_auth.html', {'recibo': recibo})

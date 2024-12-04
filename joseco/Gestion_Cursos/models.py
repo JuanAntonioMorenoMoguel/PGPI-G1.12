@@ -27,3 +27,30 @@ class Recibo(models.Model):
         default='No Pagado'
     )
     codigo_referencia = models.CharField(max_length=100, unique=True, null=True, blank=True)
+
+
+class CarritoNoAuth(models.Model):
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
+    cantidad = models.PositiveIntegerField(default=1)  # Por si se permite añadir varias veces
+    fecha_agregado = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.curso}"
+
+
+class ReciboNoAuth(models.Model):
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name='recibos_noauth')
+    nombre = models.CharField(max_length=255)  # Para usuarios no registrados
+    email = models.EmailField()  # Para usuarios no registrados
+    fecha_pago = models.DateTimeField()
+    importe = models.DecimalField(max_digits=8, decimal_places=2)
+    metodo_pago = models.CharField(max_length=50)
+    estado = models.CharField(
+        max_length=10,
+        choices=[
+            ('Pagado', 'Pagado'),
+            ('No Pagado', 'No Pagado')
+        ],
+        default='No Pagado'
+    )
+    codigo_referencia = models.CharField(max_length=100, unique=True, null=True, blank=True)
