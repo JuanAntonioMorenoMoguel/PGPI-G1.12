@@ -7,7 +7,7 @@
 {% endblock extra_css %}
 
 {% block content %}
-<div class="form-container">
+<div class="form-container mb-4">
     <h2>{% if form.instance.pk %}Editar Horario{% else %}Crear Horario{% endif %}</h2>
     <form method="post">
         {% csrf_token %}

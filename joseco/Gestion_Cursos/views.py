@@ -37,9 +37,16 @@ def agregar_a_carrito(request, curso_id):
         carrito.save()
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # Comprobar si es AJAX
-        return JsonResponse({"message": "Curso añadido al carrito", "carrito_cantidad": Carrito.objects.filter(usuario=request.user).count()})
+        return JsonResponse({
+            "message": "Curso añadido al carrito",
+            "carrito_cantidad": Carrito.objects.filter(usuario=request.user).count(),
+            "curso_id": curso.id,  # Para identificar el curso en el frontend
+            "ocultar_comprar": True  # Indicador para ocultar el botón "Comprar"
+        })
     
     return redirect('ver_carrito')
+
+
 
 @csrf_exempt
 def agregar_a_carrito_no_auth(request, curso_id):
@@ -51,10 +58,15 @@ def agregar_a_carrito_no_auth(request, curso_id):
         carrito.save()
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # Comprobar si es AJAX
-        return JsonResponse({"message": "Curso añadido al carrito", "carrito_cantidad": CarritoNoAuth.objects.count()})
+        return JsonResponse({
+            "message": "Curso añadido al carrito",
+            "carrito_cantidad": CarritoNoAuth.objects.count(),
+            "curso_id": curso.id,  # Identificador del curso
+            "ocultar_comprar": True  # Indicador para ocultar el botón "Comprar"
+        })
         
-    return redirect('ver_carrito_no_auth')
- # Redirección si no es AJAX
+    return redirect('ver_carrito_no_auth')  # Redirección si no es AJAX
+
 
 @login_required
 def eliminar_de_carrito(request, curso_id):

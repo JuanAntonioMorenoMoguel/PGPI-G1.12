@@ -159,7 +159,7 @@ def lista_recibos(request):
     recibosAuth = Recibo.objects.all()
     for recibo in recibosAuth:
         user = User.objects.get(id=recibo.usuario_id)
-        recibo.nombre = user.nombre
+        recibo.nombre = user.first_name
         recibo.email = user.email
         recibo.auth = True
     recibosNoAuth =ReciboNoAuth.objects.all()
