@@ -49,7 +49,7 @@
 {% endblock extra_css %}
 
 {% block content %}
-<div class="content-wrapper">
+<div class="content-wrapper"  style="padding-bottom: 20px;">
     <div class="form-container mt-5">
         <h2>Resumen de compra</h2>
 
@@ -92,7 +92,7 @@
         {% for curso in cursos %}
         <input type="hidden" name="cursos_seleccionados" value="{{ curso.id }}">
         {% endfor %}
-        <button type="submit" class="button-primary">Pagar con tarjeta</button>
+        <a type="submit" class="button-primary">Pagar con tarjeta</a>
     </form>
 
     <!-- Botón para pagar en efectivo -->
@@ -103,7 +103,7 @@
         {% for curso in cursos %}
         <input type="hidden" name="cursos_seleccionados" value="{{ curso.id }}">
         {% endfor %}
-        <button type="button" class="button-primary" id="efectivoButton">Pago en efectivo</button>
+        <a type="button" class="button-primary" id="efectivoButton">Pago en efectivo</a>
     </form>
     <a class="button-primary" href="{% url 'ver_carrito_no_auth' %}">Cancelar</a>
 
