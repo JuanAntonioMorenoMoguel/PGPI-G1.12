@@ -3,10 +3,11 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/cursos.css' %}">
+
 {% endblock extra_css %}
 
 {% block content %}
-<h1 class="titulo text-center">Lista de Cursos</h1>
+<h1 class="titulo text-center" style = "margin-top: 60px;">Lista de Cursos</h1>
 
 <!-- Formulario de filtrado -->
 <form method="get" class="form-filters mb-4">
@@ -41,7 +42,7 @@
                 {{ filtro.form.fecha_finalizacion }}
             </div>
         </div>
-        <div class="button-group d-flex gap-2">
+        <div class="button-group d-flex gap-2 align-items-center">
             <button type="submit" class="btn btn-primary">Filtrar</button>
             <a href="{% url 'lista_cursos' %}" class="btn btn-danger">Resetear</a>
         </div>
@@ -88,8 +89,9 @@
                                 <form method="post" action="{% url 'agregar_a_carrito' curso.id %}" class="form-reserva" data-curso-id="{{ curso.id }}">
                                     {% csrf_token %}
                                     {% if curso.vacantes > 0 and curso.id not in carrito and curso.id not in recibos %}
-                                        <button type="button" class="btn btn-success me-2" onclick="reservarCurso({{ curso.id }})">Añadir al carrito</button>
-                                        <a href="{% url 'resumen_compra' curso.id %}" class="btn btn-primary">Comprar</a>
+                                        <button id="btn-curso-{{ curso.id }}" type="button" class="btn btn-success me-2" 
+                                        onclick="reservarCurso({{ curso.id }})">Añadir al carrito</button>
+                                        <a id="btn-comprar-{{ curso.id }}" href="{% url 'resumen_compra' curso.id %}" class="btn btn-primary">Comprar</a>
                                     {% elif curso.id in carrito %}
                                         <button type="button" class="btn btn-secondary" disabled>Ya está en el carrito</button>
                                     {% elif curso.id in recibos %}
@@ -109,8 +111,9 @@
                         <form method="post" action="{% url 'agregar_a_carrito_no_auth' curso.id %}" class="form-reserva" data-curso-id="{{ curso.id }}">
                             {% csrf_token %}
                             {% if curso.vacantes > 0 and curso.id not in carrito and curso.id not in recibos %}
-                                <button type="button" class="btn btn-success me-2" onclick="reservarCursoNoAuth({{ curso.id }})">Añadir al carrito</button>
-                                <a href="{% url 'resumen_compra_no_auth' curso.id %}" class="btn btn-primary">Comprar</a>
+                                <button id="btn-curso-no-auth-{{ curso.id }}" type="button" class="btn btn-success me-2" 
+                                onclick="reservarCursoNoAuth({{ curso.id }})">Añadir al carrito</button>
+                                <a id="btn-comprar-no-auth-{{ curso.id }}" href="{% url 'resumen_compra_no_auth' curso.id %}" class="btn btn-primary">Comprar</a>
                             {% elif curso.id in carrito %}
                                 <button type="button" class="btn btn-secondary" disabled>Ya está en el carrito</button>
                             {% elif curso.id in recibos %}
@@ -141,33 +144,53 @@
 
 <script>
     function reservarCurso(cursoId) {
-        const url = `/agregar-a-carrito/${cursoId}/`;
-        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    const url = `/agregar-a-carrito/${cursoId}/`;
+    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    const buttonAgregar = document.getElementById(`btn-curso-${cursoId}`); // Botón "Añadir al carrito"
+    const buttonComprar = document.getElementById(`btn-comprar-${cursoId}`); // Botón "Comprar"
 
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                alert(data.message);
-            }
-            const carritoCantidad = document.getElementById('carrito-cantidad');
-            if (carritoCantidad) {
-                carritoCantidad.textContent = data.carrito_cantidad;
-            }
-            
-        })
-        .catch(error => console.error('Error:', error));
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message); // Mostrar mensaje de confirmación
+        }
+
+        // Actualizar el botón "Añadir al carrito"
+        if (buttonAgregar) {
+            buttonAgregar.textContent = "Ya está en el carrito"; // Cambiar el texto del botón
+            buttonAgregar.classList.remove('btn-success'); // Cambiar el estilo del botón
+            buttonAgregar.classList.add('btn-secondary');
+            buttonAgregar.disabled = true; // Desactivar el botón
+        }
+
+        // Ocultar el botón "Comprar"
+        if (data.ocultar_comprar && buttonComprar) {
+            buttonComprar.style.display = 'none'; // Ocultar el botón
+        }
+
+        // Actualizar el contador del carrito si existe
+        const carritoCantidad = document.getElementById('carrito-cantidad');
+        if (carritoCantidad) {
+            carritoCantidad.textContent = data.carrito_cantidad;
+        }
+    })
+    .catch(error => console.error('Error:', error));
     }
+
+
 
     function reservarCursoNoAuth(cursoId) {
         const url = `/agregar-a-carrito-no-auth/${cursoId}/`;
         const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        const buttonAgregar = document.getElementById(`btn-curso-no-auth-${cursoId}`); // Botón "Añadir al carrito"
+        const buttonComprar = document.getElementById(`btn-comprar-no-auth-${cursoId}`); // Botón "Comprar"
 
         fetch(url, {
             method: 'POST',
@@ -179,15 +202,30 @@
         .then(response => response.json())
         .then(data => {
             if (data.message) {
-                alert(data.message);
+                alert(data.message); // Mostrar mensaje de confirmación
             }
+
+            // Actualizar el botón "Añadir al carrito"
+            if (buttonAgregar) {
+                buttonAgregar.textContent = "Ya está en el carrito"; // Cambiar el texto del botón
+                buttonAgregar.classList.remove('btn-success'); // Cambiar el estilo del botón
+                buttonAgregar.classList.add('btn-secondary');
+                buttonAgregar.disabled = true; // Desactivar el botón
+            }
+
+            // Ocultar el botón "Comprar"
+            if (data.ocultar_comprar && buttonComprar) {
+                buttonComprar.style.display = 'none'; // Ocultar el botón
+            }
+
+            // Actualizar el contador del carrito si existe
             const carritoCantidad = document.getElementById('carrito-cantidad');
             if (carritoCantidad) {
                 carritoCantidad.textContent = data.carrito_cantidad;
             }
-            
         })
         .catch(error => console.error('Error:', error));
     }
+
 </script>
 {% endblock content %}

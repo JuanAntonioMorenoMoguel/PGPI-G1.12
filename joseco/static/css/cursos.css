@@ -7,6 +7,7 @@
     margin: 0 auto;
     padding: 10px;
     max-width: 1200px; /* Ajustar el ancho máximo del contenedor */
+    margin-bottom: 40px;
 }
 
 .form-filters {
