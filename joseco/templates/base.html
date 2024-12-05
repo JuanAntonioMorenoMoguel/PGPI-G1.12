@@ -84,6 +84,10 @@
                 {% if user.is_authenticated %}
                     {% if user.is_staff %}
                         <!-- Opciones para staff (si aplica) -->
+                        <a class="nav-link" href="{% url 'admin_usuarios' %}">Usuarios</a>
+                        <a class="nav-link" href="{% url 'lista_cursos' %}">Cursos</a>
+                        <a class="nav-link" href="{% url 'admin_horarios' %}">Horarios</a>
+                        <a class="nav-link" href="{% url 'admin_recibos' %}">Recibos</a>
                     {% elif not user.is_superuser %}
                         <a class="nav-link" href="{% url 'mis_cursos' %}">Mis Cursos</a>
                         <a class="nav-link" href="{% url 'mis_recibos' %}">Mis Recibos</a>
