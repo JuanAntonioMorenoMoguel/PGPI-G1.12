@@ -21,6 +21,7 @@
                 <th>Importe</th>
                 <th>Método de Pago</th>
                 <th>Estado</th>
+                <th>Codigo de referencia</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -35,6 +36,7 @@
                 <td>{{ recibo.importe }}</td>
                 <td>{{ recibo.metodo_pago }}</td>
                 <td>{{ recibo.estado }}</td>
+                <td>{{ recibo.codigo_referencia }}</td>
                 <td>
                     {% if recibo.estado == 'No Pagado' %}
                         {% if recibo.auth %}
