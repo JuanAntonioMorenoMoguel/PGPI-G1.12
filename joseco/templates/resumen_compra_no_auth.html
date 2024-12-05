@@ -78,14 +78,16 @@
     <div class="user-info mt-5">
         <div class="mb-3">
             <label for="usuario" class="form-label"><strong>Nombre:</strong></label>
-            <input type="text" id="usuario" name="usuario" class="form-control" value="{{ nombre }}" required>
+            <input type="text" id="usuario" name="usuario" class="form-control" placeholder="Ejemplo: Juan Pérez" required>
+            <span id="errorNombre" class="text-danger" style="display: none;">El nombre debe tener entre 3 y 255 caracteres.</span>
         </div>
         <div class="mb-3">
             <label for="email" class="form-label"><strong>Email:</strong></label>
-            <input type="email" id="email" name="email" class="form-control" value="{{ email }}" required>
+            <input type="email" id="email" name="email" class="form-control" placeholder="Ejemplo: ejemplo@gmail.com" required>
+            <span id="errorEmail" class="text-danger" style="display: none;">Introduce un correo electrónico válido.</span>
         </div>
     </div>
-  </div>
+</div>
 
 
   <a class="button-primary" href="{% url 'datos_pago_no_auth' curso.id %}">Pagar con tarjeta</a>
@@ -121,35 +123,49 @@
   const hiddenEmailInput = document.getElementById('hiddenEmail');
   const efectivoForm = document.getElementById('efectivoForm');
 
-  // Función para guardar la información del usuario en localStorage
-  function saveUserInfo() {
-    localStorage.setItem('usuario', usuarioInput.value);
-    localStorage.setItem('email', emailInput.value);
+    // Validación del nombre
+  function validarNombre(nombre) {
+    return nombre && nombre.length >= 3 && nombre.length <= 255;
   }
 
-  // Actualizar los campos ocultos del formulario con la información del usuario
-  function updateHiddenInputs() {
-    hiddenUsuarioInput.value = usuarioInput.value;
-    hiddenEmailInput.value = emailInput.value;
+  // Validación del email
+  function validarEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Regex para validar emails
+    return emailRegex.test(email);
   }
 
-  // Cargar la información del usuario desde localStorage si está disponible
-  document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('usuario')) {
-      usuarioInput.value = localStorage.getItem('usuario');
-      hiddenUsuarioInput.value = localStorage.getItem('usuario');
-    }
-    if (localStorage.getItem('email')) {
-      emailInput.value = localStorage.getItem('email');
-      hiddenEmailInput.value = localStorage.getItem('email');
-    }
-  });
-
-  // Mostrar el modal para pago en efectivo
+  // Mostrar el modal para pago en efectivo con validación
   efectivoButton.addEventListener('click', () => {
-    saveUserInfo();
-    updateHiddenInputs();
-    confirmModal.style.display = 'block';
+    const nombre = usuarioInput.value.trim();
+    const email = emailInput.value.trim();
+
+    let valido = true;
+
+    // Validar nombre
+    if (!validarNombre(nombre)) {
+      errorNombre.style.display = 'block';
+      usuarioInput.classList.add('is-invalid');
+      valido = false;
+    } else {
+      errorNombre.style.display = 'none';
+      usuarioInput.classList.remove('is-invalid');
+    }
+
+    // Validar email
+    if (!validarEmail(email)) {
+      errorEmail.style.display = 'block';
+      emailInput.classList.add('is-invalid');
+      valido = false;
+    } else {
+      errorEmail.style.display = 'none';
+      emailInput.classList.remove('is-invalid');
+    }
+
+    if (valido) {
+      saveUserInfo();
+      updateHiddenInputs();
+      confirmModal.style.display = 'block';
+    }
   });
 
   // Confirmar acción de pago en efectivo
@@ -170,5 +186,18 @@
       confirmModal.style.display = 'none';
     }
   });
+
+  // Cargar la información del usuario desde localStorage si está disponible
+  document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('usuario')) {
+      usuarioInput.value = localStorage.getItem('usuario');
+      hiddenUsuarioInput.value = localStorage.getItem('usuario');
+    }
+    if (localStorage.getItem('email')) {
+      emailInput.value = localStorage.getItem('email');
+      hiddenEmailInput.value = localStorage.getItem('email');
+    }
+  });
+
 </script>
 {% endblock content %}

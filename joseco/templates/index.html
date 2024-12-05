@@ -193,7 +193,7 @@
                                 {% if user.is_authenticated %}
                                 <form method="post" action="{% url 'agregar_a_carrito' 2 %}" class="form-reserva" data-curso-id="{{ 2 }}">
                                     {% csrf_token %}
-                                    <button id="añadiralcarro2" type="button"  class="btn btn-success me-2" onclick="reservarCursoNoAuth({{ 2 }})">Añadir al carrito</button>
+                                    <button id="añadiralcarro2" type="button"  class="btn btn-success me-2" onclick="reservarCurso({{ 2 }})">Añadir al carrito</button>
                                     <a href="{% url 'resumen_compra' 2 %}" class="btn btn-primary">Comprar</a>
                                 </form>
                                 {% else %}
@@ -289,7 +289,7 @@
                 }
                 const boton = document.getElementById('añadiralcarro' + cursoId);
                 if (boton) {
-                    boton.innerText = 'Ya está al carrito';
+                    boton.innerText = 'Ya está en el carrito';
                     boton.disabled = true;
                 }
             })
@@ -318,7 +318,7 @@
                 }
                 const boton = document.getElementById('añadiralcarro' + cursoId);
                 if (boton) {
-                    boton.innerText = 'Ya está al carrito';
+                    boton.innerText = 'Ya está en el carrito';
                     boton.disabled = true;
                 }
             })

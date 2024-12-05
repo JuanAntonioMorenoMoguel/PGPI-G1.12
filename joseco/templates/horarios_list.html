@@ -4,10 +4,45 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/table.css' %}">
-{% endblock extra_css %}
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        width: 400px;
+        text-align: center;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .btn-secundario {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .btn-secundario:hover {
+        background-color: #5a6268;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<h1 class="titulo text-center" style = "margin-top: 60px;">Lista de Horarios</h1>
+<h1 class="titulo text-center" style="margin-top: 60px;">Lista de Horarios</h1>
 <div class="table-container">
     <table class="custom-table">
         <thead>
@@ -32,10 +67,7 @@
                 <td>{{ horario.horas_totales }}</td>
                 <td>
                     <a href="{% url 'editar_horario' horario.id %}" class="btn btn-azul">Editar</a>
-                    <form method="post" action="{% url 'eliminar_horario' horario.id %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-rojo">Eliminar</button>
-                    </form>
+                    <button type="button" class="btn btn-rojo eliminar-btn" data-id="{{ horario.id }}" data-curso="{{ horario.curso.nombre }}">Eliminar</button>
                 </td>
             </tr>
             {% empty %}
@@ -52,4 +84,56 @@
         </a>
     </div>
 </div>
+
+<!-- Modal para confirmar eliminación -->
+<div id="eliminarModal" class="modal">
+    <div class="modal-content">
+        <p id="modalMessage">¿Está seguro de que desea eliminar este horario?</p>
+        <form id="eliminarForm" method="post">
+            {% csrf_token %}
+            <div style="display: flex; justify-content: center; gap: 10px;">
+                <button type="submit" class="btn btn-rojo">Eliminar</button>
+                <button type="button" id="cancelModal" class="btn btn-secundario">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const eliminarModal = document.getElementById('eliminarModal');
+        const eliminarForm = document.getElementById('eliminarForm');
+        const cancelModal = document.getElementById('cancelModal');
+        const modalMessage = document.getElementById('modalMessage');
+
+        // Manejar clic en los botones de eliminar
+        document.querySelectorAll('.eliminar-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const horarioId = button.dataset.id;
+                const cursoNombre = button.dataset.curso;
+
+                // Configurar mensaje y URL en el formulario
+                modalMessage.textContent = `¿Está seguro de que desea eliminar el horario del curso "${cursoNombre}"?`;
+                eliminarForm.action = `/admin/horarios/${horarioId}/eliminar/`;
+
+                // Mostrar el modal
+                eliminarModal.style.display = 'block';
+            });
+        });
+
+        // Cancelar y cerrar el modal
+        cancelModal.addEventListener('click', () => {
+            eliminarModal.style.display = 'none';
+        });
+
+        // Cerrar el modal al hacer clic fuera del contenido
+        window.addEventListener('click', (event) => {
+            if (event.target === eliminarModal) {
+                eliminarModal.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+
 {% endblock %}

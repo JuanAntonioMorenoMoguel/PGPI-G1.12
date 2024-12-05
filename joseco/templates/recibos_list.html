@@ -7,9 +7,9 @@
 {% endblock extra_css %}
 
 {% block content %}
-<h1 class="titulo text-center" style = "margin-top: 60px;">Lista de Recibos</h1>
+<h1 class="titulo text-center" style="margin-top: 60px;">Lista de Recibos</h1>
 <div class="table-container">
-    
+
     <table class="custom-table">
         <thead>
             <tr>
@@ -50,8 +50,10 @@
                             <button type="submit" class="btn btn-azul">Marcar como Pagado</button>
                         </form>
                         {% endif %}
+                    {% else %}
+                    <span style="color: grey;">Sin acciones disponibles</span>
                     {% endif %}
-                </td> 
+                </td>
             </tr>
             {% endfor %}
         </tbody>
