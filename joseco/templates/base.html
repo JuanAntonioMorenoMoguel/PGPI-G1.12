@@ -100,7 +100,7 @@
                     <a class="nav-link" href="{% url 'contacto' %}">Contáctanos</a>
                     <form action="{% url 'cerrar_sesion' %}" method="post" class="d-inline">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-link nav-link p-0" style="text-decoration: none;">Cerrar Sesión</button>
+                        <button type="submit" class="btn-link nav-link p-0" style="text-decoration: none;">Cerrar Sesión</button>
                     </form>
                 {% else %}
                     <a href="{% url 'inicio_sesion' %}" class="btn btn-primary">Acceso</a>
