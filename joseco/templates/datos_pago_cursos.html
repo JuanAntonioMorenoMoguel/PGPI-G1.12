@@ -14,20 +14,15 @@
         {% for curso in cursos %}
         <div class="curso-info">
             <p><strong>Curso:</strong> {{ curso.nombre }}</p>
-            <p><strong>Precio:</strong> {{ curso.precio }} €</p>
-            <hr>
         </div>
         {% endfor %}
 
-        <p><strong>Total a pagar:</strong> {{ costo_total }} €</p>
+        <p><strong>Precio:</strong> {{ costo_total }} €</p>
 
         <!-- Formulario para datos de usuario y tarjeta -->
         <form id="payment-form">
-            <h3>Datos del Usuario</h3>
             <input type="text" id="nombre" placeholder="Nombre" class="form-control mb-2" required>
             <input type="text" id="apellidos" placeholder="Apellidos" class="form-control mb-2" required>
-
-            <h3>Datos de la Tarjeta</h3>
             <div id="card-element" class="form-control mb-3"></div>
 
             <!-- Botón de pago -->
