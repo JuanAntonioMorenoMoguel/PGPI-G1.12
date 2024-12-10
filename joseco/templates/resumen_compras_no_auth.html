@@ -99,17 +99,17 @@
         <button class="button-primary">Pagar con tarjeta</button>
     </form>
 
-    <!-- Botón para pagar en efectivo -->
-    <form id="efectivoForm" method="post" action="{% url 'pagos_efectivo_no_auth' %}">
-        {% csrf_token %}
-        <input type="hidden" id="hiddenNombre" name="nombre" value="{{ nombre }}">
-        <input type="hidden" id="hiddenEmail" name="email" value="{{ email }}">
-        {% for curso in cursos %}
-        <input type="hidden" name="cursos_seleccionados" value="{{ curso.id }}">
-        {% endfor %}
-        <button class="button-primary" id="efectivoButton">Pago en efectivo</button>
-    </form>
-    <a class="button-primary" href="{% url 'ver_carrito_no_auth' %}">Cancelar</a>
+    <!-- Formulario para pago en efectivo -->
+  <form id="efectivoForm" method="post" action="{% url 'pagos_efectivo_no_auth' %}">
+    {% csrf_token %}
+    <input type="hidden" id="hiddenNombre" name="nombre">
+    <input type="hidden" id="hiddenEmail" name="email">
+    {% for curso in cursos %}
+    <input type="hidden" name="cursos_seleccionados" value="{{ curso.id }}">
+    {% endfor %}
+    <button class="button-primary" id="efectivoButton">Pago en efectivo</button>
+  </form>
+  <a class="button-primary" href="{% url 'ver_carrito_no_auth' %}">Cancelar</a>
 
 <!-- Modal -->
 <div id="confirmModal" class="modal">
@@ -120,10 +120,10 @@
         <button class="cancel" id="cancelModal">Cancelar</button>
       </div>
     </div>
+  </div>
 </div>
 
 <script>
-    // Elementos del DOM
     const efectivoButton = document.getElementById('efectivoButton');
     const confirmModal = document.getElementById('confirmModal');
     const confirmEfectivo = document.getElementById('confirmEfectivo');
@@ -133,85 +133,61 @@
     const emailInput = document.getElementById('email');
     const hiddenNombreInput = document.getElementById('hiddenNombre');
     const hiddenEmailInput = document.getElementById('hiddenEmail');
-
+  
     // Validación del nombre
-function validarNombre(nombre) {
-    return nombre && nombre.length >= 3 && nombre.length <= 255;
-}
-
-// Validación del email
-function validarEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Regex para validar emails
-    return emailRegex.test(email);
-}
-
-// Mostrar el modal para pago en efectivo con validación
-efectivoButton.addEventListener('click', () => {
-    const nombre = usuarioInput.value.trim();
-    const email = emailInput.value.trim();
-
-    let valido = true;
-
-    // Validar nombre
-    if (!validarNombre(nombre)) {
+    function validarNombre(nombre) {
+      return nombre && nombre.length >= 3 && nombre.length <= 255;
+    }
+  
+    // Validación del email
+    function validarEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+  
+    efectivoButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      const nombre = usuarioInput.value.trim();
+      const email = emailInput.value.trim();
+      let valido = true;
+  
+      if (!validarNombre(nombre)) {
         errorNombre.style.display = 'block';
         usuarioInput.classList.add('is-invalid');
         valido = false;
-    } else {
+      } else {
         errorNombre.style.display = 'none';
         usuarioInput.classList.remove('is-invalid');
-    }
-
-    // Validar email
-    if (!validarEmail(email)) {
+      }
+  
+      if (!validarEmail(email)) {
         errorEmail.style.display = 'block';
         emailInput.classList.add('is-invalid');
         valido = false;
-    } else {
+      } else {
         errorEmail.style.display = 'none';
         emailInput.classList.remove('is-invalid');
-    }
-
-    if (valido) {
-        updateHiddenInputs();
+      }
+  
+      if (valido) {
+        hiddenNombreInput.value = nombre;
+        hiddenEmailInput.value = email;
         confirmModal.style.display = 'block';
-    }
-});
-
-// Confirmar acción de pago en efectivo
-confirmEfectivo.addEventListener('click', () => {
-    updateHiddenInputs();
-    efectivoForm.submit(); // Enviar el formulario para proceder con el pago en efectivo
-});
-
-  // Actualizar los campos ocultos con los valores de los inputs visibles
-  function updateHiddenInputs() {
-    hiddenUsuarioInput.value = usuarioInput.value.trim();
-    hiddenEmailInput.value = emailInput.value.trim();
-  }
-// Cancelar acción
-cancelModal.addEventListener('click', () => {
-    confirmModal.style.display = 'none';
-});
-
-// Cerrar modal si se hace clic fuera del contenido
-window.addEventListener('click', (event) => {
-    if (event.target === confirmModal) {
+      }
+    });
+  
+    confirmEfectivo.addEventListener('click', () => {
+      efectivoForm.submit();
+    });
+  
+    cancelModal.addEventListener('click', () => {
+      confirmModal.style.display = 'none';
+    });
+  
+    window.addEventListener('click', (event) => {
+      if (event.target === confirmModal) {
         confirmModal.style.display = 'none';
-    }
-});
-
-// Cargar la información del usuario desde localStorage si está disponible
-document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('usuario')) {
-        usuarioInput.value = localStorage.getItem('usuario');
-        hiddenNombreInput.value = localStorage.getItem('usuario');
-    }
-    if (localStorage.getItem('email')) {
-        emailInput.value = localStorage.getItem('email');
-        hiddenEmailInput.value = localStorage.getItem('email');
-    }
-});
-
-</script>
+      }
+    });
+  </script>
 {% endblock content %}

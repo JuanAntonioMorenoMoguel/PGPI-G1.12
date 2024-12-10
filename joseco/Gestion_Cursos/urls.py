@@ -34,10 +34,5 @@ urlpatterns = [
     path('mis_cursos/', views.mis_cursos, name='mis_cursos'),
     path('recibos_usuario/', views.ver_recibo, name='ver_recibo'),
     path('ver_recibo/', views.ver_recibo, name='ver_recibo'),
-    path('ver_recibo_no_auth/', views.ver_recibo_no_auth, name='ver_recibo_no_auth'),
-
-
-
-    
-    
+    path('ver_recibo_no_auth/', views.ver_recibo_no_auth, name='ver_recibo_no_auth'),  
 ]

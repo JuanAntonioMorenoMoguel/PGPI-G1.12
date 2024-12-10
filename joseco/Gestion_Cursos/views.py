@@ -12,6 +12,7 @@ from django.conf import settings
 import stripe
 from django.core.serializers.json import DjangoJSONEncoder
 from decimal import Decimal
+import re
 import uuid
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -606,22 +607,26 @@ def create_payment_intents_cursos_no_auth(request):
             nombre = data.get('nombre')
             email = data.get('email')
 
+            print(f"Datos del usuario no autenticado: Nombre: {nombre}, Email: {email}")
+
+            # Validación de datos
             if not curso_ids:
                 return JsonResponse({'error': "No se seleccionaron cursos para procesar el pago."}, status=400)
-            
-            if not nombre or not email:
-                return JsonResponse({'error': "El nombre y el correo electrónico son obligatorios."}, status=400)
+            if not re.match(r"^[A-Za-z\s]{3,255}$", nombre):
+                return JsonResponse({'error': "El nombre debe contener entre 3 y 255 caracteres alfabéticos."}, status=400)
+            if not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
+                return JsonResponse({'error': "El correo electrónico no es válido."}, status=400)
 
             # Obtener los cursos seleccionados
             cursos = Curso.objects.filter(id__in=curso_ids)
             if not cursos.exists():
                 return JsonResponse({'error': "No se encontraron los cursos seleccionados."}, status=404)
 
-            # Crear recibos y PaymentIntent para cada curso
+            # Crear recibos
             recibos = []
             recibo_referencias = []
             for curso in cursos:
-                amount = int(curso.precio * 100)  # Precio en céntimos para Stripe
+                amount = int(curso.precio * 100)
                 intent = stripe.PaymentIntent.create(
                     amount=amount,
                     currency='eur',
@@ -637,19 +642,12 @@ def create_payment_intents_cursos_no_auth(request):
                     estado="Pagado",
                     codigo_referencia=str(uuid.uuid4())
                 )
-                
+                print(f"Recibo generado: {recibo}")
+
                 recibo_referencias.append(recibo.codigo_referencia)
-
-                # Reducir el número de vacantes del curso
-                if curso.vacantes > 0:
-                    curso.vacantes -= 1
-                    curso.save()
-
-                
-                
                 recibos.append({
                     'recibo_id': recibo.id,
-                    'client_secret': intent['client_secret'],  # Stripe client_secret para cada curso
+                    'client_secret': intent['client_secret'],
                     'curso': {
                         'id': curso.id,
                         'nombre': curso.nombre,
@@ -660,10 +658,15 @@ def create_payment_intents_cursos_no_auth(request):
                         'especialidad': curso.especialidad
                     }
                 })
+
+                if curso.vacantes > 0:
+                        curso.vacantes -= 1
+                        curso.save()
                 
                 # Eliminar del carrito
                 CarritoNoAuth.objects.filter(curso=curso).delete()
 
+            
             # Configurar MailerSend
             api_key = "mlsn.0bbe8f6ec29be52d485a718518233e3b897f4dacc7c0fd60abb1a9e6426d8d67"
             mailer = emails.NewEmail(api_key)
@@ -682,6 +685,7 @@ def create_payment_intents_cursos_no_auth(request):
                     "email": email,
                 }
             ]
+            print(f"Datos del usuario no autenticado: Nombre: {nombre}, Email: {email}")
 
             subject = "Confirmación de compra de cursos"
             text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
@@ -977,49 +981,40 @@ def pagos_efectivo(request):
 @csrf_exempt
 def pagos_efectivo_no_auth(request):
     if request.method == 'POST':
-        # Obtener los IDs de los cursos seleccionados desde el formulario
         cursos_ids = request.POST.getlist('cursos_seleccionados')
         nombre = request.POST.get('nombre')
         email = request.POST.get('email')
 
-        # Validar que se hayan ingresado todos los datos necesarios
+        # Debug: Imprimir los valores recibidos
+        print(f"Cursos seleccionados: {cursos_ids}")
+        print(f"Nombre: {nombre}, Email: {email}")
+
         if not cursos_ids or not nombre or not email:
             return JsonResponse({'error': 'Debe proporcionar todos los datos requeridos (cursos, nombre y correo electrónico).'}, status=400)
 
-        # Obtener los cursos correspondientes
         cursos = get_list_or_404(Curso, id__in=cursos_ids)
-
-        n = len(cursos)
         gastos_gestion_totales = Decimal('10.00') if any(
-            not (
-                curso.duracion_meses() >= 1 and
-                4 <= curso.horas_semanales and
-                (curso.precio / curso.duracion_meses()) >= 75
-            ) for curso in cursos
+            not (curso.duracion_meses() >= 1 and 4 <= curso.horas_semanales and (curso.precio / curso.duracion_meses()) >= 75)
+            for curso in cursos
         ) else Decimal('0.00')
-
-        gastos_gestion_por_curso = gastos_gestion_totales / n if n > 0 else 0
 
         recibos = []
         recibo_referencias = []
         for curso in cursos:
-            if curso.vacantes >= 1:
+            if curso.vacantes > 0:
                 curso.vacantes -= 1
                 curso.save()
-
-                # Crear un recibo para cada curso
                 recibo = ReciboNoAuth.objects.create(
                     nombre=nombre,
                     email=email,
                     curso=curso,
                     fecha_pago=now(),
-                    importe=curso.precio + gastos_gestion_por_curso,
+                    importe=curso.precio + (gastos_gestion_totales / len(cursos)),
                     metodo_pago="Efectivo",
                     estado="No Pagado",
                     codigo_referencia=str(uuid.uuid4())
                 )
                 recibo_referencias.append(recibo.codigo_referencia)
-                # Eliminar del carrito no autenticado
                 CarritoNoAuth.objects.filter(curso=curso).delete()
                 recibos.append(recibo)
 
@@ -1046,16 +1041,20 @@ def pagos_efectivo_no_auth(request):
         text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
         html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
 
-        i=0
-        for curso in cursos:    
+        # Validar que las longitudes coinciden
+        if len(cursos) != len(recibo_referencias):
+            print(f"Error: Diferente número de cursos ({len(cursos)}) y referencias de recibos ({len(recibo_referencias)}).")
+            return JsonResponse({'error': "No se pudieron procesar todos los cursos seleccionados."}, status=500)
+
+
+        for curso, referencia in zip(cursos, recibo_referencias):   
             html += f"<h2>{curso.nombre}</h2>"
             html += f"<p>Precio: {curso.precio} €</p>"
             html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
             html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
             html += f"<p>Modalidad: {curso.modalidad}</p>"
             html += f"<p>Especialidad: {curso.especialidad}</p>"
-            html += f"<p>Código de referencia: {recibo_referencias[i]}</p><br>"
-            i+=1
+            html += f"<p>Código de referencia: {referencia}</p><br>"
         html += f"<p>Precio Total: {sum(curso.precio for curso in cursos) + gastos_gestion_totales} €</p><br>"
         html += "<p>Gracias por tu compra.</p>"
 
