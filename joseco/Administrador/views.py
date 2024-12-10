@@ -162,6 +162,7 @@ def lista_recibos(request):
         recibo.nombre = user.first_name
         recibo.email = user.email
         recibo.auth = True
+        recibos.append(recibo)
     recibosNoAuth =ReciboNoAuth.objects.all()
     for recibo in recibosNoAuth:
         recibo.auth = False
@@ -173,7 +174,6 @@ def recibos_usuario(request, user_id):
     recibos = usuario.recibos.all()
     return render(request, 'recibos_usuario.html', {'recibos': recibos, 'usuario': usuario})
 
-#aaa
 def cambiar_estado(request, recibo_id):
     if request.method == 'POST':
         recibo = get_object_or_404(Recibo, id=recibo_id)

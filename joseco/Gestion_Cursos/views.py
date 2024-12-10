@@ -177,7 +177,6 @@ def create_payment_intent_no_auth(request):
         nombre = data.get('nombre')
         email = data.get('email')
 
-        print("Datos recibidos:", data)
         if not nombre or not email:
             return JsonResponse({'error': 'Nombre y correo electrónico son obligatorios.'}, status=400)
 
@@ -206,15 +205,15 @@ def create_payment_intent_no_auth(request):
             )
 
             # Configurar MailerSend
-            api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+            api_key = "mlsn.0bbe8f6ec29be52d485a718518233e3b897f4dacc7c0fd60abb1a9e6426d8d67"
             mailer = emails.NewEmail(api_key)
 
             # Crear el cuerpo del correo
             mail_body = {}
 
             mail_from = {
-                "name": "MS_dPjZxa",
-                "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+                "name": "MS_EN7hSF",
+                "email": "MS_EN7hSF@trial-pxkjn41ejzplz781.mlsender.net",
             }
 
             recipients = [
@@ -247,8 +246,6 @@ def create_payment_intent_no_auth(request):
 
             # Enviar el correo electrónico
             mailer.send(mail_body)
-
-            print("Datos recibidos:", recibo.codigo_referencia)
 
             # Respuesta JSON con el client secret y recibo_id
             return JsonResponse({'clientSecret': intent['client_secret'], 'recibo_id': recibo.id})
@@ -304,15 +301,15 @@ def create_payment_intent(request):
             )
 
             # Configurar MailerSend
-            api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+            api_key = "mlsn.0bbe8f6ec29be52d485a718518233e3b897f4dacc7c0fd60abb1a9e6426d8d67"
             mailer = emails.NewEmail(api_key)
 
             # Crear el cuerpo del correo
             mail_body = {}
 
             mail_from = {
-                "name": "MS_dPjZxa",
-                "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+                "name": "MS_EN7hSF",
+                "email": "MS_EN7hSF@trial-pxkjn41ejzplz781.mlsender.net",
             }
 
             recipients = [
@@ -536,15 +533,15 @@ def create_payment_intents_cursos(request):
                 })
 
             # Configurar MailerSend
-            api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+            api_key = "mlsn.0bbe8f6ec29be52d485a718518233e3b897f4dacc7c0fd60abb1a9e6426d8d67"
             mailer = emails.NewEmail(api_key)
 
             # Crear el cuerpo del correo
             mail_body = {}
 
             mail_from = {
-                "name": "MS_dPjZxa",
-                "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+                "name": "MS_EN7hSF",
+                "email": "MS_EN7hSF@trial-pxkjn41ejzplz781.mlsender.net",
             }
 
             recipients = [
@@ -558,7 +555,8 @@ def create_payment_intents_cursos(request):
             text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
             html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
 
-            for curso in cursos:
+            for recibo in recibos:
+                curso = recibo.curso
                 html += f"<h2>{curso.nombre}</h2>"
                 html += f"<p>Precio: {curso.precio} €</p>"
                 html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
@@ -567,6 +565,7 @@ def create_payment_intents_cursos(request):
                 html += f"<p>Especialidad: {curso.especialidad}</p>"
                 html += f"<p>Código de referencia: {recibo.codigo_referencia}</p><br>"
             html += f"<p>Precio Total: {sum(curso.precio for curso in cursos)} €</p><br>"
+                
             html += "<p>Gracias por tu compra.</p>"
 
             mailer.set_mail_from(mail_from, mail_body)
@@ -609,6 +608,7 @@ def create_payment_intents_cursos_no_auth(request):
 
             # Crear recibos y PaymentIntent para cada curso
             recibos = []
+            recibo_referencias = []
             for curso in cursos:
                 amount = int(curso.precio * 100)  # Precio en céntimos para Stripe
                 intent = stripe.PaymentIntent.create(
@@ -626,27 +626,43 @@ def create_payment_intents_cursos_no_auth(request):
                     estado="Pagado",
                     codigo_referencia=str(uuid.uuid4())
                 )
+                
+                recibo_referencias.append(recibo.codigo_referencia)
 
                 # Reducir el número de vacantes del curso
                 if curso.vacantes > 0:
                     curso.vacantes -= 1
                     curso.save()
 
+                
+                
                 recibos.append({
                     'recibo_id': recibo.id,
                     'client_secret': intent['client_secret'],  # Stripe client_secret para cada curso
+                    'curso': {
+                        'id': curso.id,
+                        'nombre': curso.nombre,
+                        'precio': curso.precio,
+                        'fecha_inicio': curso.fecha_inicio,
+                        'fecha_finalizacion': curso.fecha_finalizacion,
+                        'modalidad': curso.modalidad,
+                        'especialidad': curso.especialidad
+                    }
                 })
+                
+                # Eliminar del carrito
+                CarritoNoAuth.objects.filter(curso=curso).delete()
 
             # Configurar MailerSend
-            api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+            api_key = "mlsn.0bbe8f6ec29be52d485a718518233e3b897f4dacc7c0fd60abb1a9e6426d8d67"
             mailer = emails.NewEmail(api_key)
 
             # Crear el cuerpo del correo
             mail_body = {}
 
             mail_from = {
-                "name": "MS_dPjZxa",
-                "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+                "name": "MS_EN7hSF",
+                "email": "MS_EN7hSF@trial-pxkjn41ejzplz781.mlsender.net",
             }
 
             recipients = [
@@ -660,15 +676,18 @@ def create_payment_intents_cursos_no_auth(request):
             text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
             html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
 
-            for curso in cursos:
+            i=0
+            for curso in cursos:    
                 html += f"<h2>{curso.nombre}</h2>"
                 html += f"<p>Precio: {curso.precio} €</p>"
                 html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
                 html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
                 html += f"<p>Modalidad: {curso.modalidad}</p>"
                 html += f"<p>Especialidad: {curso.especialidad}</p>"
-                html += f"<p>Código de referencia: {recibo.codigo_referencia}</p><br>"
+                html += f"<p>Código de referencia: {recibo_referencias[i]}</p><br>"
+                i+=1
             html += f"<p>Precio Total: {sum(curso.precio for curso in cursos)} €</p><br>"
+                
             html += "<p>Gracias por tu compra.</p>"
 
             mailer.set_mail_from(mail_from, mail_body)
@@ -714,15 +733,15 @@ def pago_efectivo(request, curso_id):
 
         )
     
-    api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+    api_key = "mlsn.0bbe8f6ec29be52d485a718518233e3b897f4dacc7c0fd60abb1a9e6426d8d67"
     mailer = emails.NewEmail(api_key)
 
     # Crear el cuerpo del correo
     mail_body = {}
 
     mail_from = {
-        "name": "MS_dPjZxa",
-        "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+        "name": "MS_EN7hSF",
+        "email": "MS_EN7hSF@trial-pxkjn41ejzplz781.mlsender.net",
     }
 
     recipients = [
@@ -801,15 +820,15 @@ def pago_efectivo_no_auth(request, curso_id):
         )
 
         # Configurar MailerSend para enviar la confirmación por correo electrónico
-        api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+        api_key = "mlsn.0bbe8f6ec29be52d485a718518233e3b897f4dacc7c0fd60abb1a9e6426d8d67"
         mailer = emails.NewEmail(api_key)
 
         # Crear el cuerpo del correo
         mail_body = {}
 
         mail_from = {
-            "name": "MS_dPjZxa",
-            "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+            "name": "MS_EN7hSF",
+            "email": "MS_EN7hSF@trial-pxkjn41ejzplz781.mlsender.net",
         }
 
         recipients = [
@@ -892,15 +911,15 @@ def pagos_efectivo(request):
 
         
         # Configurar MailerSend
-        api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+        api_key = "mlsn.0bbe8f6ec29be52d485a718518233e3b897f4dacc7c0fd60abb1a9e6426d8d67"
         mailer = emails.NewEmail(api_key)
 
         # Crear el cuerpo del correo
         mail_body = {}
 
         mail_from = {
-            "name": "MS_dPjZxa",
-            "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+            "name": "MS_EN7hSF",
+            "email": "MS_EN7hSF@trial-pxkjn41ejzplz781.mlsender.net",
         }
 
         recipients = [
@@ -988,15 +1007,15 @@ def pagos_efectivo_no_auth(request):
                 recibos.append(recibo)
 
         # Configurar MailerSend
-        api_key = "mlsn.124c9a38b107174e5d50f1c290a00f4eb1fcd43e80fb4a7aa4b60fad3a351103"
+        api_key = "mlsn.0bbe8f6ec29be52d485a718518233e3b897f4dacc7c0fd60abb1a9e6426d8d67"
         mailer = emails.NewEmail(api_key)
 
         # Crear el cuerpo del correo
         mail_body = {}
 
         mail_from = {
-            "name": "MS_dPjZxa",
-            "email": "MS_dPjZxa@trial-0p7kx4xjyoml9yjr.mlsender.net",
+            "name": "MS_EN7hSF",
+            "email": "MS_EN7hSF@trial-pxkjn41ejzplz781.mlsender.net",
         }
 
         recipients = [
