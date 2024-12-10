@@ -95,7 +95,7 @@
     {% csrf_token %}
     <input type="hidden" id="hiddenUsuario" name="nombre" value="{{ nombre }}">
     <input type="hidden" id="hiddenEmail" name="email" value="{{ email }}">
-    <a type="button" class="button-primary" id="efectivoButton" style="width: 100%;">Pago en efectivo</a>
+    <button  class="button-primary" id="efectivoButton" style="width: 100%;">Pago en efectivo</button>
   </form>
   <a class="button-primary" href="{% url 'lista_cursos' %}" >Cancelar</a>
 </div>

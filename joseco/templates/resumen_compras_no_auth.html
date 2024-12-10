@@ -96,7 +96,7 @@
         {% for curso in cursos %}
         <input type="hidden" name="cursos_seleccionados" value="{{ curso.id }}">
         {% endfor %}
-        <a type="submit" class="button-primary">Pagar con tarjeta</a>
+        <button class="button-primary">Pagar con tarjeta</button>
     </form>
 
     <!-- Botón para pagar en efectivo -->
@@ -107,7 +107,7 @@
         {% for curso in cursos %}
         <input type="hidden" name="cursos_seleccionados" value="{{ curso.id }}">
         {% endfor %}
-        <a type="button" class="button-primary" id="efectivoButton">Pago en efectivo</a>
+        <button class="button-primary" id="efectivoButton">Pago en efectivo</button>
     </form>
     <a class="button-primary" href="{% url 'ver_carrito_no_auth' %}">Cancelar</a>
 
