@@ -323,7 +323,6 @@ def create_payment_intent(request):
             text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
             html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
 
-            
             html += f"<h2>{curso.nombre}</h2>"
             html += f"<p>Precio: {curso.precio} €</p>"
             html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
@@ -506,6 +505,7 @@ def create_payment_intents_cursos(request):
 
             # Crear recibos y PaymentIntent para cada curso
             recibos = []
+            recibo_referencias = []
             for curso in cursos:
                 amount = int(curso.precio * 100)  # Precio en céntimos para Stripe
                 intent = stripe.PaymentIntent.create(
@@ -523,6 +523,7 @@ def create_payment_intents_cursos(request):
                     codigo_referencia=str(uuid.uuid4())
 
                 )
+                recibo_referencias.append(recibo.codigo_referencia)
 
                 # Eliminar del carrito
                 Carrito.objects.filter(usuario=request.user, curso=curso).delete()
@@ -530,6 +531,15 @@ def create_payment_intents_cursos(request):
                 recibos.append({
                     'recibo_id': recibo.id,
                     'client_secret': intent['client_secret'],  # Stripe client_secret para cada curso
+                    'curso': {
+                        'id': curso.id,
+                        'nombre': curso.nombre,
+                        'precio': curso.precio,
+                        'fecha_inicio': curso.fecha_inicio,
+                        'fecha_finalizacion': curso.fecha_finalizacion,
+                        'modalidad': curso.modalidad,
+                        'especialidad': curso.especialidad
+                    }
                 })
 
             # Configurar MailerSend
@@ -555,15 +565,16 @@ def create_payment_intents_cursos(request):
             text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
             html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
 
-            for recibo in recibos:
-                curso = recibo.curso
+            i=0
+            for curso in cursos:    
                 html += f"<h2>{curso.nombre}</h2>"
                 html += f"<p>Precio: {curso.precio} €</p>"
                 html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
                 html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
                 html += f"<p>Modalidad: {curso.modalidad}</p>"
                 html += f"<p>Especialidad: {curso.especialidad}</p>"
-                html += f"<p>Código de referencia: {recibo.codigo_referencia}</p><br>"
+                html += f"<p>Código de referencia: {recibo_referencias[i]}</p><br>"
+                i+=1
             html += f"<p>Precio Total: {sum(curso.precio for curso in cursos)} €</p><br>"
                 
             html += "<p>Gracias por tu compra.</p>"
@@ -891,6 +902,7 @@ def pagos_efectivo(request):
         gastos_gestion_por_curso = gastos_gestion_totales / n if n > 0 else 0
 
         recibos = []
+        recibo_referencias = []
         for curso in cursos:
             if curso.vacantes >= 1:
                 curso.vacantes -= 1
@@ -906,6 +918,7 @@ def pagos_efectivo(request):
                     estado="No Pagado",
                     codigo_referencia=str(uuid.uuid4())
                 )
+                recibo_referencias.append(recibo.codigo_referencia)
                 Carrito.objects.filter(usuario=request.user, curso=curso).delete()
                 recibos.append(recibo)
 
@@ -933,14 +946,16 @@ def pagos_efectivo(request):
         text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
         html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
 
-        for curso in cursos:
+        i=0
+        for curso in cursos:    
             html += f"<h2>{curso.nombre}</h2>"
             html += f"<p>Precio: {curso.precio} €</p>"
             html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
             html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
             html += f"<p>Modalidad: {curso.modalidad}</p>"
             html += f"<p>Especialidad: {curso.especialidad}</p>"
-            html += f"<p>Código de referencia: {recibo.codigo_referencia}</p><br>"
+            html += f"<p>Código de referencia: {recibo_referencias[i]}</p><br>"
+            i+=1
         html += f"<p>Precio Total: {sum(curso.precio for curso in cursos)} €</p><br>"
         html += "<p>Gracias por tu compra.</p>"
 
@@ -986,6 +1001,7 @@ def pagos_efectivo_no_auth(request):
         gastos_gestion_por_curso = gastos_gestion_totales / n if n > 0 else 0
 
         recibos = []
+        recibo_referencias = []
         for curso in cursos:
             if curso.vacantes >= 1:
                 curso.vacantes -= 1
@@ -1002,6 +1018,7 @@ def pagos_efectivo_no_auth(request):
                     estado="No Pagado",
                     codigo_referencia=str(uuid.uuid4())
                 )
+                recibo_referencias.append(recibo.codigo_referencia)
                 # Eliminar del carrito no autenticado
                 CarritoNoAuth.objects.filter(curso=curso).delete()
                 recibos.append(recibo)
@@ -1029,15 +1046,16 @@ def pagos_efectivo_no_auth(request):
         text = "Gracias por tu compra. Aquí tienes los detalles de los cursos y recibos."
         html = "<h1>Gracias por tu compra</h1><p>Aquí tienes los detalles de los cursos y recibos:</p><br>"
 
-        for recibo in recibos:
-            curso = recibo.curso
+        i=0
+        for curso in cursos:    
             html += f"<h2>{curso.nombre}</h2>"
             html += f"<p>Precio: {curso.precio} €</p>"
             html += f"<p>Fecha de inicio: {curso.fecha_inicio}</p>"
             html += f"<p>Fecha de fin: {curso.fecha_finalizacion}</p>"
             html += f"<p>Modalidad: {curso.modalidad}</p>"
             html += f"<p>Especialidad: {curso.especialidad}</p>"
-            html += f"<p>Código de referencia: {recibo.codigo_referencia}</p><br>"
+            html += f"<p>Código de referencia: {recibo_referencias[i]}</p><br>"
+            i+=1
         html += f"<p>Precio Total: {sum(curso.precio for curso in cursos) + gastos_gestion_totales} €</p><br>"
         html += "<p>Gracias por tu compra.</p>"
 
