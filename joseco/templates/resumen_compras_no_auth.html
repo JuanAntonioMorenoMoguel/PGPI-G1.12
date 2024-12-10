@@ -173,7 +173,6 @@ efectivoButton.addEventListener('click', () => {
     }
 
     if (valido) {
-        saveUserInfo();
         updateHiddenInputs();
         confirmModal.style.display = 'block';
     }
@@ -181,11 +180,15 @@ efectivoButton.addEventListener('click', () => {
 
 // Confirmar acción de pago en efectivo
 confirmEfectivo.addEventListener('click', () => {
-    saveUserInfo();
     updateHiddenInputs();
     efectivoForm.submit(); // Enviar el formulario para proceder con el pago en efectivo
 });
 
+  // Actualizar los campos ocultos con los valores de los inputs visibles
+  function updateHiddenInputs() {
+    hiddenUsuarioInput.value = usuarioInput.value.trim();
+    hiddenEmailInput.value = emailInput.value.trim();
+  }
 // Cancelar acción
 cancelModal.addEventListener('click', () => {
     confirmModal.style.display = 'none';

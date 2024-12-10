@@ -122,8 +122,10 @@
   const hiddenUsuarioInput = document.getElementById('hiddenUsuario');
   const hiddenEmailInput = document.getElementById('hiddenEmail');
   const efectivoForm = document.getElementById('efectivoForm');
+  const errorNombre = document.getElementById('errorNombre');
+  const errorEmail = document.getElementById('errorEmail');
 
-    // Validación del nombre
+  // Validación del nombre
   function validarNombre(nombre) {
     return nombre && nombre.length >= 3 && nombre.length <= 255;
   }
@@ -135,7 +137,8 @@
   }
 
   // Mostrar el modal para pago en efectivo con validación
-  efectivoButton.addEventListener('click', () => {
+  efectivoButton.addEventListener('click', (event) => {
+    event.preventDefault(); // Prevenir el envío del formulario por defecto
     const nombre = usuarioInput.value.trim();
     const email = emailInput.value.trim();
 
@@ -162,7 +165,6 @@
     }
 
     if (valido) {
-      saveUserInfo();
       updateHiddenInputs();
       confirmModal.style.display = 'block';
     }
@@ -170,7 +172,6 @@
 
   // Confirmar acción de pago en efectivo
   confirmEfectivo.addEventListener('click', () => {
-    saveUserInfo();
     updateHiddenInputs();
     efectivoForm.submit(); // Enviar el formulario para proceder con el pago en efectivo
   });
@@ -187,11 +188,17 @@
     }
   });
 
+  // Actualizar los campos ocultos con los valores de los inputs visibles
+  function updateHiddenInputs() {
+    hiddenUsuarioInput.value = usuarioInput.value.trim();
+    hiddenEmailInput.value = emailInput.value.trim();
+  }
+
   // Cargar la información del usuario desde localStorage si está disponible
   document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('usuario')) {
-      usuarioInput.value = localStorage.getItem('usuario');
-      hiddenUsuarioInput.value = localStorage.getItem('usuario');
+    if (localStorage.getItem('nombre')) {
+      usuarioInput.value = localStorage.getItem('nombre');
+      hiddenUsuarioInput.value = localStorage.getItem('nombre');
     }
     if (localStorage.getItem('email')) {
       emailInput.value = localStorage.getItem('email');
@@ -199,5 +206,10 @@
     }
   });
 
+  // Manejo del evento de envío del formulario
+  efectivoForm.addEventListener('submit', (event) => {
+    updateHiddenInputs(); // Actualizar los valores justo antes de enviar
+  });
 </script>
+
 {% endblock content %}

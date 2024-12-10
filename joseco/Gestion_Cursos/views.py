@@ -109,7 +109,7 @@ def carrito_cantidad(request):
 def carrito_cantidad_no_auth(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         cantidad = CarritoNoAuth.objects.count()
-        return JsonResponse({"carrito_cantidad": cantidad})
+        return JsonResponse({"carrito_cantidad_no_auth": cantidad})
     return JsonResponse({"error": "Acceso no permitido"}, status=403)
 
 @login_required
